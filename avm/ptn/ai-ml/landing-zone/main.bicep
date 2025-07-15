@@ -4,8 +4,6 @@ targetScope = 'resourceGroup'
 // PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
-// NOTE: Set parameter values using main.parameters.json
-
 // ----------------------------------------------------------------------
 // Imports
 // ----------------------------------------------------------------------
@@ -84,7 +82,7 @@ param deployVM bool = true
 // AI Foundry Dependencies
 
 @description('The AI Search Service full ARM resource ID. Optional; if not provided, a new resource will be created.')
-param aiSearchResourceId string = ''
+param aiFoundrySearchResourceId string = ''
 
 @description('The AI Storage Account full ARM resource ID. Optional; if not provided, a new resource will be created.')
 param aiFoundryStorageAccountResourceId string = ''
@@ -239,7 +237,7 @@ param vmUserName string = ''
 
 @secure()
 @description('Admin password for the test VM user')
-param vmAdminPassword string
+param vmAdminPassword string = ''
 
 @description('Size of the test VM')
 param vmSize string = 'Standard_D4s_v3'
@@ -274,22 +272,32 @@ var _tags = union(_azdTags, deploymentTags)
 // ----------------------------------------------------------------------
 
 // Azure Cognitive Search Service
-var _searchPassedIn = aiSearchResourceId != ''
-var _searchParts = split(aiSearchResourceId, '/')
-var _aiSearchServiceSubscriptionId = _searchPassedIn ? _searchParts[2] : subscription().subscriptionId
-var _aiSearchServiceResourceGroupName = _searchPassedIn ? _searchParts[4] : resourceGroup().name
+var _aiFoundrySearchPassedIn = aiFoundrySearchResourceId != ''
+var _aiFoundrySearchParts = split(aiFoundrySearchResourceId, '/')
+var _aiFoundrySearchServiceSubscriptionId = _aiFoundrySearchPassedIn
+  ? _aiFoundrySearchParts[2]
+  : subscription().subscriptionId
+var _aiFoundrySearchServiceResourceGroupName = _aiFoundrySearchPassedIn
+  ? _aiFoundrySearchParts[4]
+  : resourceGroup().name
 
 // Azure Cosmos DB Account
-var _cosmosPassedIn = aiFoundryCosmosDBAccountResourceId != ''
-var _cosmosParts = split(aiFoundryCosmosDBAccountResourceId, '/')
-var _cosmosDBSubscriptionId = _cosmosPassedIn ? _cosmosParts[2] : subscription().subscriptionId
-var _cosmosDBResourceGroupName = _cosmosPassedIn ? _cosmosParts[4] : resourceGroup().name
+var _aiFoundryCosmosPassedIn = aiFoundryCosmosDBAccountResourceId != ''
+var _aiFoundryCosmosParts = split(aiFoundryCosmosDBAccountResourceId, '/')
+var _aiFoundryCosmosDBSubscriptionId = _aiFoundryCosmosPassedIn
+  ? _aiFoundryCosmosParts[2]
+  : subscription().subscriptionId
+var _aiFoundryCosmosDBResourceGroupName = _aiFoundryCosmosPassedIn ? _aiFoundryCosmosParts[4] : resourceGroup().name
 
 // Azure Storage Account
-var _storagePassedIn = aiFoundryStorageAccountResourceId != ''
-var _storageParts = split(aiFoundryStorageAccountResourceId, '/')
-var _azureStorageSubscriptionId = _storagePassedIn ? _storageParts[2] : subscription().subscriptionId
-var _azureStorageResourceGroupName = _storagePassedIn ? _storageParts[4] : resourceGroup().name
+var _aiFoundryStoragePassedIn = aiFoundryStorageAccountResourceId != ''
+var _aiFoundryStorageParts = split(aiFoundryStorageAccountResourceId, '/')
+var _aiFoundryAzureStorageSubscriptionId = _aiFoundryStoragePassedIn
+  ? _aiFoundryStorageParts[2]
+  : subscription().subscriptionId
+var _aiFoundryaAzureStorageResourceGroupName = _aiFoundryStoragePassedIn
+  ? _aiFoundryStorageParts[4]
+  : resourceGroup().name
 
 // Container Apps Environment
 var _containerEnvPassedIn = containerEnvResourceId != ''
@@ -311,6 +319,40 @@ var _keyVaultParts = split(keyVaultResourceId, '/')
 var _keyVaultSubscriptionId = _keyVaultPassedIn ? _keyVaultParts[2] : subscription().subscriptionId
 var _keyVaultResourceGroupName = _keyVaultPassedIn ? _keyVaultParts[4] : resourceGroup().name
 
+// Cosmos DB
+var _cosmosDbPassedIn = cosmosDbResourceId != ''
+var _cosmosDbParts = split(cosmosDbResourceId, '/')
+var _cosmosDbSubscriptionIdd = _cosmosDbPassedIn ? _cosmosDbParts[2] : subscription().subscriptionId
+var _cosmosDbResourceGroupNamed = _cosmosDbPassedIn ? _cosmosDbParts[4] : resourceGroup().name
+
+// Azure Cognitive Search
+var _searchServicePassedIn = searchServiceResourceId != ''
+var _searchServiceParts = split(searchServiceResourceId, '/')
+var _searchServiceSubscriptionId = _searchServicePassedIn ? _searchServiceParts[2] : subscription().subscriptionId
+var _searchServiceResourceGroupName = _searchServicePassedIn ? _searchServiceParts[4] : resourceGroup().name
+
+// Storage Account
+var _storageAccountPassedIn = storageAccountResourceId != ''
+var _storageAccountParts = split(storageAccountResourceId, '/')
+var _storageAccountSubscriptionId = _storageAccountPassedIn ? _storageAccountParts[2] : subscription().subscriptionId
+var _storageAccountResourceGroupName = _storageAccountPassedIn ? _storageAccountParts[4] : resourceGroup().name
+
+// Log Analytics Workspace
+var _logAnalyticsWorkspacePassedIn = logAnalyticsWorkspaceResourceId != ''
+var _logAnalyticsWorkspaceParts = split(logAnalyticsWorkspaceResourceId, '/')
+var _logAnalyticsWorkspaceSubscriptionId = _logAnalyticsWorkspacePassedIn
+  ? _logAnalyticsWorkspaceParts[2]
+  : subscription().subscriptionId
+var _logAnalyticsWorkspaceResourceGroupName = _logAnalyticsWorkspacePassedIn
+  ? _logAnalyticsWorkspaceParts[4]
+  : resourceGroup().name
+
+// Application Insights
+var _appInsightsPassedIn = appInsightsResourceId != ''
+var _appInsightsParts = split(appInsightsResourceId, '/')
+var _appInsightsSubscriptionId = _appInsightsPassedIn ? _appInsightsParts[2] : subscription().subscriptionId
+var _appInsightsResourceGroupName = _appInsightsPassedIn ? _appInsightsParts[4] : resourceGroup().name
+
 // ----------------------------------------------------------------------
 // Container vars
 // ----------------------------------------------------------------------
@@ -322,11 +364,21 @@ var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-hellow
 // ----------------------------------------------------------------------
 
 #disable-next-line BCP318
-var _peSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/pe-subnet' : ''
+var _subnetIdPeSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/pe-subnet' : ''
+var _subnetIDCappEnvSubnet = networkIsolation
+  #disable-next-line BCP318
+  ? '${virtualNetwork.outputs.resourceId}/subnets/aca-environment-subnet'
+  : ''
 #disable-next-line BCP318
-var _caEnvSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/aca-environment-subnet' : ''
+var _subnetIdJumpbxSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/jumpbox-subnet' : ''
 #disable-next-line BCP318
-var _jumpbxSubnetId = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/jumpbox-subnet' : ''
+var _subnetIdAgentSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/agent-subnet' : ''
+#disable-next-line BCP318
+var _subNetIdAppGwSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/AppGatewaySubnet' : ''
+var _subnetIdAPIMgmtSubnet = networkIsolation
+  #disable-next-line BCP318
+  ? '${virtualNetwork.outputs.resourceId}/subnets/api-management-subnet'
+  : ''
 
 // ----------------------------------------------------------------------
 // VM vars
@@ -429,7 +481,7 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (ne
 // Azure Bastion
 
 //  Key Vault to store that password securely
-module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployVM && networkIsolation) {
+module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.13.0' = if (deployVM && networkIsolation) {
   name: 'vmKeyVault'
   params: {
     name: '${const.abbrs.security.keyVault}testvm-${resourceToken}'
@@ -473,7 +525,7 @@ module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (de
 }
 
 // Test VM
-module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM && networkIsolation) {
+module testVm 'br/public:avm/res/compute/virtual-machine:0.15.1' = if (deployVM && networkIsolation) {
   name: 'testVmDeployment'
   params: {
     name: _vmName
@@ -503,7 +555,7 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (deployVM 
           {
             name: 'ipconfig01'
             #disable-next-line BCP318
-            subnetResourceId: _jumpbxSubnetId
+            subnetResourceId: _subnetIdJumpbxSubnet
           }
         ]
       }
@@ -693,7 +745,7 @@ module privateEndpointAIFoundryAccount 'br/public:avm/res/network/private-endpoi
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryAccountName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'cogsvcsConnection'
@@ -728,7 +780,7 @@ module privateEndpointSearchDepStd 'br/public:avm/res/network/private-endpoint:0
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.aiSearchName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'searchStdConnection'
@@ -762,7 +814,7 @@ module privateEndpointCosmosDepStd 'br/public:avm/res/network/private-endpoint:0
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.cosmosDBName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'cosmosStdConnection'
@@ -796,7 +848,7 @@ module privateEndpointBlobDepStd 'br/public:avm/res/network/private-endpoint:0.1
     name: '${const.abbrs.networking.privateEndpoint}${aiFoundryDependencies.outputs.azureStorageName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'blobStdConnection'
@@ -830,7 +882,7 @@ module privateEndpointStorageBlob 'br/public:avm/res/network/private-endpoint:0.
     name: '${const.abbrs.networking.privateEndpoint}${storageAccountName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'blobConnection'
@@ -865,7 +917,7 @@ module privateEndpointCosmos 'br/public:avm/res/network/private-endpoint:0.11.0'
     name: '${const.abbrs.networking.privateEndpoint}${dbAccountName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'cosmosConnection'
@@ -900,7 +952,7 @@ module privateEndpointSearch 'br/public:avm/res/network/private-endpoint:0.11.0'
     name: '${const.abbrs.networking.privateEndpoint}${searchServiceName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'searchConnection'
@@ -935,7 +987,7 @@ module privateEndpointKeyVault 'br/public:avm/res/network/private-endpoint:0.11.
     name: '${const.abbrs.networking.privateEndpoint}${keyVaultName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'kvConnection'
@@ -970,7 +1022,7 @@ module privateEndpointAppConfig 'br/public:avm/res/network/private-endpoint:0.11
     name: '${const.abbrs.networking.privateEndpoint}${appConfigName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'appConfigConnection'
@@ -1005,7 +1057,7 @@ module privateEndpointContainerAppsEnv 'br/public:avm/res/network/private-endpoi
     name: '${const.abbrs.networking.privateEndpoint}${containerEnvName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'ccaConnection'
@@ -1040,7 +1092,7 @@ module privateEndpointAcr 'br/public:avm/res/network/private-endpoint:0.11.0' = 
     name: '${const.abbrs.networking.privateEndpoint}${containerRegistryName}'
     location: location
     tags: _tags
-    subnetResourceId: _peSubnetId
+    subnetResourceId: _subnetIdPeSubnet
     privateLinkServiceConnections: [
       {
         name: 'acrConnection'
@@ -1068,21 +1120,81 @@ module privateEndpointAcr 'br/public:avm/res/network/private-endpoint:0.11.0' = 
   ]
 }
 
+// API Management
+//////////////////////////////////////////////////////////////////////////
+module apiManagement 'br/public:avm/res/api-management/service:0.9.1' = if (greenFieldDeployment) {
+  name: 'apimDeployment'
+  params: {
+    name: 'apimgw-${resourceToken}'
+    publisherEmail: 'owner@contoso.com'
+    publisherName: 'Contoso Admin'
+    sku: 'Premium'
+    virtualNetworkType: networkIsolation ? 'Internal' : 'None'
+    subnetResourceId: _subnetIdAPIMgmtSubnet
+    tags: _tags
+  }
+  dependsOn: [
+    appGw
+    virtualNetwork!
+  ]
+}
+
 // Azure Application Gateway
 //////////////////////////////////////////////////////////////////////////
-// Coming Soon
+module appGw 'br/public:avm/res/network/application-gateway:0.7.0' = if (greenFieldDeployment) {
+  name: 'applicationGatewayDeployment'
+  params: {
+    name: 'appGw-${resourceToken}'
+    gatewayIPConfigurations: [{ name: 'appGwIPConfig', properties: { subnet: { id: _subNetIdAppGwSubnet } } }]
+    frontendIPConfigurations: [{ name: 'appGwFrontendIP', properties: { subnet: { id: _subNetIdAppGwSubnet } } }]
+    frontendPorts: [{ name: 'appGwFrontendPort', properties: { port: 80 } }]
+    backendAddressPools: [{ name: 'appGwBackEndPool' }]
+    backendHttpSettingsCollection: [{ name: 'appGwBackEndSettings', properties: { port: 80, protocol: 'Http' } }]
+    requestRoutingRules: [
+      { name: 'appGwRule', properties: { ruleType: 'Basic', httpListener: { id: '' } /* placeholder */ } }
+    ]
+    sku: 'Standard_v2'
+  }
+  dependsOn: [virtualNetwork!]
+}
 
 // Azure Firewall
 //////////////////////////////////////////////////////////////////////////
-// Coming Soon
+module azureFirewall 'br/public:avm/res/network/azure-firewall:0.7.1' = if (greenFieldDeployment) {
+  name: 'azureFirewallDeployment'
+  params: {
+    name: 'azFw-${resourceToken}'
+    #disable-next-line BCP318
+    virtualNetworkResourceId: virtualNetwork.outputs.resourceId
+    location: location
+  }
+  dependsOn: [
+    virtualNetwork!
+  ]
+}
 
 // AI Foundry Standard Setup
 //////////////////////////////////////////////////////////////////////////
 
 // Custom modules are used for AI Foundry Account and Project (V2) since no published AVM module available at this time.
 
-// 1) In the future, replace this section by AI Foundry Pattern
+// 1) Replace this section by AI Foundry Pattern
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/ptn/ai-ml/ai-foundry
+
+// module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.1.0' = {
+//   name: 'aiFoundryDeployment'
+//   params: {
+//     // Required parameters
+//     aiFoundryType: 'StandardPrivate'
+//     contentSafetyEnabled: true
+//     name: '<name>'
+//     // Non-required parameters
+//     aiModelDeployments: []
+//     userObjectId: '00000000-0000-0000-0000-000000000000'
+//     vmAdminPasswordOrKey: vmAdminPassword
+//     vmSize: 'Standard_DS4_v2'
+//   }
+// }
 
 // 2) Custom modules based on AI Foundry Documentation Samples:
 // https://github.com/azure-ai-foundry/foundry-samples/tree/main/samples/microsoft/infrastructure-setup
@@ -1090,55 +1202,9 @@ module privateEndpointAcr 'br/public:avm/res/network/private-endpoint:0.11.0' = 
 module aiFoundryValidateExistingResources 'modules/standard-setup/validate-existing-resources.bicep' = {
   name: 'validate-existing-resources-${resourceToken}-deployment'
   params: {
-    aiSearchResourceId: aiSearchResourceId
+    aiSearchResourceId: aiFoundrySearchResourceId
     azureStorageAccountResourceId: aiFoundryStorageAccountResourceId
     azureCosmosDBAccountResourceId: aiFoundryCosmosDBAccountResourceId
-  }
-}
-
-// User Managed Identities for AI Foundry resources
-
-//AI Foundry Account User Managed Identity
-module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
-//AI Foundry Search User Managed Identity
-module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
-//AI Foundry Cosmos User Managed Identity
-module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
-// AI Foundry Project User Managed Identity
-module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
-    // Non-required parameters
-    location: location
   }
 }
 
@@ -1153,7 +1219,7 @@ module aiFoundryDependencies 'modules/standard-setup/standard-dependent-resource
     cosmosDBName: aiFoundryCosmosDbName
 
     // AI Search Service parameters
-    aiSearchResourceId: aiSearchResourceId
+    aiSearchResourceId: aiFoundrySearchResourceId
     aiSearchExists: aiFoundryValidateExistingResources.outputs.aiSearchExists
 
     // Storage Account
@@ -1315,19 +1381,8 @@ module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (deployAppI
 // Container Resources
 //////////////////////////////////////////////////////////////////////////
 
-//Container Apps Env User Managed Identity
-module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${containerEnvName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${containerEnvName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
 // Container Apps Environment
-module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (deployContainerEnv) {
+module containerEnv 'br/public:avm/res/app/managed-environment:0.10.0' = if (deployContainerEnv) {
   name: 'containerEnv'
   params: {
     name: containerEnvName
@@ -1352,19 +1407,8 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.9.1' = if (depl
       #disable-next-line BCP318
       userAssignedResourceIds: useUAI ? [containerEnvUAI.outputs.resourceId] : []
     }
-    infrastructureSubnetId: networkIsolation ? _caEnvSubnetId : ''
+    infrastructureSubnetId: networkIsolation ? _subnetIDCappEnvSubnet : ''
     internal: networkIsolation ? true : false
-  }
-}
-
-//Container Registry User Managed Identity
-module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${containerRegistryName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${containerRegistryName}'
-    // Non-required parameters
-    location: location
   }
 }
 
@@ -1385,22 +1429,9 @@ module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' =
   }
 }
 
-//Container Apps User Managed Identity
-module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = [
-  for app in containerAppsList: if (useUAI) {
-    name: '${const.abbrs.security.managedIdentity}${app.service_name}'
-    params: {
-      // Required parameters
-      name: '${const.abbrs.security.managedIdentity}${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
-      // Non-required parameters
-      location: location
-    }
-  }
-]
-
 // Container Apps
 @batchSize(1)
-module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
+module containerApps 'br/public:avm/res/app/container-app:0.18.1' = [
   for (app, index) in containerAppsList: if (deployContainerApps) {
     name: empty(app.name) ? '${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}' : app.name
     params: {
@@ -1469,18 +1500,7 @@ module containerApps 'br/public:avm/res/app/container-app:0.17.0' = [
 // Cosmos DB Account and Database
 //////////////////////////////////////////////////////////////////////////
 
-//Cosmos User Managed Identity
-module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${dbAccountName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${dbAccountName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
-module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' = if (deployCosmosDb) {
+module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.13.0' = if (deployCosmosDb) {
   name: 'CosmosDBAccount'
   params: {
     name: dbAccountName
@@ -1524,7 +1544,7 @@ module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.12.0' =
 // Key Vault
 //////////////////////////////////////////////////////////////////////////
 
-module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault) {
+module keyVault 'br/public:avm/res/key-vault/vault:0.13.0' = if (deployKeyVault) {
   name: 'keyVault'
   params: {
     name: keyVaultName
@@ -1539,7 +1559,7 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.12.1' = if (deployKeyVault)
 // Log Analytics Workspace
 //////////////////////////////////////////////////////////////////////////
 
-module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = if (deployLogAnalytics) {
+module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (deployLogAnalytics) {
   name: 'logAnalytics'
   params: {
     name: logAnalyticsWorkspaceName
@@ -1556,18 +1576,7 @@ module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.11.1' = 
 // AI Search
 //////////////////////////////////////////////////////////////////////////
 
-//Search Service User Managed Identity
-module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${searchServiceName}'
-  params: {
-    // Required parameters
-    name: '${const.abbrs.security.managedIdentity}${searchServiceName}'
-    // Non-required parameters
-    location: location
-  }
-}
-
-module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (deploySearchService) {
+module searchService 'br/public:avm/res/search/search-service:0.11.0' = if (deploySearchService) {
   name: 'searchService'
   params: {
     name: searchServiceName
@@ -1650,7 +1659,7 @@ module searchService 'br/public:avm/res/search/search-service:0.10.0' = if (depl
 //////////////////////////////////////////////////////////////////////////
 
 // Storage Account
-module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (deployStorageAccount) {
+module storageAccount 'br/public:avm/res/storage/storage-account:0.25.0' = if (deployStorageAccount) {
   name: 'storageAccountSolution'
   params: {
     name: storageAccountName
@@ -1683,9 +1692,92 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (d
   }
 }
 
-// API Management
 //////////////////////////////////////////////////////////////////////////
-// Coming Soon
+// User Managed Identities
+//////////////////////////////////////////////////////////////////////////
+
+//AI Foundry Account User Managed Identity
+module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${aiFoundryAccountName}'
+    location: location
+  }
+}
+
+//AI Foundry Search User Managed Identity
+module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${aiFoundrySearchServiceName}'
+    location: location
+  }
+}
+
+//AI Foundry Cosmos User Managed Identity
+module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${aiFoundryCosmosDbName}'
+    location: location
+  }
+}
+
+// AI Foundry Project User Managed Identity
+module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${aiFoundryProjectName}'
+    location: location
+  }
+}
+
+//Container Apps Env User Managed Identity
+module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${containerEnvName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${containerEnvName}'
+    location: location
+  }
+}
+
+//Container Registry User Managed Identity
+module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${containerRegistryName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${containerRegistryName}'
+    location: location
+  }
+}
+
+//Container Apps User Managed Identity
+module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = [
+  for app in containerAppsList: if (useUAI) {
+    name: '${const.abbrs.security.managedIdentity}${app.service_name}'
+    params: {
+      name: '${const.abbrs.security.managedIdentity}${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
+      location: location
+    }
+  }
+]
+
+//Cosmos User Managed Identity
+module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${dbAccountName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${dbAccountName}'
+    location: location
+  }
+}
+
+//Search Service User Managed Identity
+module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
+  name: '${const.abbrs.security.managedIdentity}${searchServiceName}'
+  params: {
+    name: '${const.abbrs.security.managedIdentity}${searchServiceName}'
+    location: location
+  }
+}
 
 //////////////////////////////////////////////////////////////////////////
 // ROLE ASSIGNMENTS
@@ -1697,7 +1789,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.19.0' = if (d
 // AI Foundry Storage Account - Storage Blob Data Contributor -> AI Foundry Project
 module assignStorageAccountAiFoundryProject 'modules/standard-setup/azure-storage-account-role-assignment.bicep' = {
   name: 'assignStorageAccountAiFoundryProject'
-  scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
+  scope: resourceGroup(_aiFoundryAzureStorageSubscriptionId, _aiFoundryaAzureStorageResourceGroupName)
   params: {
     azureStorageName: aiFoundryDependencies.outputs.azureStorageName
     projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
@@ -1707,7 +1799,7 @@ module assignStorageAccountAiFoundryProject 'modules/standard-setup/azure-storag
 // AI Foundry Cosmos DB Account - Cosmos DB Operator -> AI Foundry Project
 module assignCosmosDBAiFoundryProject 'modules/standard-setup/cosmosdb-account-role-assignment.bicep' = {
   name: 'assignCosmosDBAiFoundryProject'
-  scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
+  scope: resourceGroup(_aiFoundryCosmosDBSubscriptionId, _aiFoundryCosmosDBResourceGroupName)
   params: {
     cosmosDBName: aiFoundryDependencies.outputs.cosmosDBName
     projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
@@ -1721,7 +1813,7 @@ module assignCosmosDBAiFoundryProject 'modules/standard-setup/cosmosdb-account-r
 // AI Foundry Search Service - Search Service Contributor -> AI Foundry Project
 module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assignments.bicep' = {
   name: 'assignSearchAiFoundryProject'
-  scope: resourceGroup(_aiSearchServiceSubscriptionId, _aiSearchServiceResourceGroupName)
+  scope: resourceGroup(_aiFoundrySearchServiceSubscriptionId, _aiFoundrySearchServiceResourceGroupName)
   params: {
     aiSearchName: aiFoundryDependencies.outputs.aiSearchName
     projectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
@@ -1735,7 +1827,7 @@ module assignSearchAiFoundryProject 'modules/standard-setup/ai-search-role-assig
 // AI Foundry Storage Account - Storage Blob Data Owner (workspace-limited) -> AI Foundry Project
 module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-storage-container-role-assignments.bicep' = {
   name: 'assignStorageContainersAiFoundryProject'
-  scope: resourceGroup(_azureStorageSubscriptionId, _azureStorageResourceGroupName)
+  scope: resourceGroup(_aiFoundryAzureStorageSubscriptionId, _aiFoundryaAzureStorageResourceGroupName)
   params: {
     aiProjectPrincipalId: aiFoundryProject.outputs.projectPrincipalId
     storageName: aiFoundryDependencies.outputs.azureStorageName
@@ -1749,7 +1841,7 @@ module assignStorageContainersAiFoundryProject 'modules/standard-setup/blob-stor
 // AI Foundry Cosmos DB Containers - Cosmos DB Built-in Data Contributor -> AI Foundry Project
 module assignCosmosDBContainersAiFoundryProject 'modules/standard-setup/cosmos-container-role-assignments.bicep' = {
   name: 'assignCosmosDBContainersAiFoundryProject'
-  scope: resourceGroup(_cosmosDBSubscriptionId, _cosmosDBResourceGroupName)
+  scope: resourceGroup(_aiFoundryCosmosDBSubscriptionId, _aiFoundryCosmosDBResourceGroupName)
   params: {
     cosmosAccountName: aiFoundryDependencies.outputs.cosmosDBName
     projectWorkspaceId: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
@@ -1821,9 +1913,10 @@ module assignKeyVaultSecretsUserAca 'modules/security/resource-role-assignment.b
             'Microsoft.Authorization/roleDefinitions',
             const.roles.KeyVaultSecretsUser.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: keyVault.outputs.resourceId
@@ -1940,9 +2033,10 @@ module assignAppConfigAppConfigurationDataReaderContainerApps 'modules/security/
             'Microsoft.Authorization/roleDefinitions',
             const.roles.AppConfigurationDataReader.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: appConfig.outputs.resourceId
@@ -1968,9 +2062,10 @@ module assignAiFoundryAccountCognitiveServicesUserContainerApps 'modules/securit
             'Microsoft.Authorization/roleDefinitions',
             const.roles.CognitiveServicesUser.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           resourceId: aiFoundryAccount.outputs.accountID
           principalType: 'ServicePrincipal'
@@ -1995,9 +2090,10 @@ module assignAIFoundryCogServOAIUserContainerApps 'modules/security/resource-rol
             'Microsoft.Authorization/roleDefinitions',
             const.roles.CognitiveServicesOpenAIUser.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           resourceId: aiFoundryAccount.outputs.accountID
           principalType: 'ServicePrincipal'
@@ -2018,7 +2114,9 @@ module assignCrAcrPullContainerApps 'modules/security/resource-role-assignment.b
           roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', const.roles.AcrPull.guid)
           #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: containerRegistry.outputs.resourceId
@@ -2041,7 +2139,9 @@ module assignCosmosDBCosmosDbBuiltInDataContributorContainerApps 'modules/securi
       cosmosDbAccountName: cosmosDBAccount.outputs.name
       #disable-next-line BCP318
       principalId: (useUAI)
+        #disable-next-line BCP318
         ? containerAppsUAI[i].outputs.principalId
+        #disable-next-line BCP318
         : containerApps[i].outputs.systemAssignedMIPrincipalId!
       roleDefinitionGuid: const.roles.CosmosDBBuiltInDataContributor.guid
       scopePath: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${dbAccountName}/dbs/${dbDatabaseName}'
@@ -2061,9 +2161,10 @@ module assignKeyVaultKeyVaultSecretsUserContainerApps 'modules/security/resource
             'Microsoft.Authorization/roleDefinitions',
             const.roles.KeyVaultSecretsUser.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: keyVault.outputs.resourceId
@@ -2089,9 +2190,10 @@ module assignSearchSearchIndexDataReaderContainerApps 'modules/security/resource
             'Microsoft.Authorization/roleDefinitions',
             const.roles.SearchIndexDataReader.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: searchService.outputs.resourceId
@@ -2117,9 +2219,10 @@ module assignSearchSearchIndexDataContributorContainerApps 'modules/security/res
             'Microsoft.Authorization/roleDefinitions',
             const.roles.SearchIndexDataContributor.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: searchService.outputs.resourceId
@@ -2145,9 +2248,10 @@ module assignStorageStorageBlobDataContributorAca 'modules/security/resource-rol
             'Microsoft.Authorization/roleDefinitions',
             const.roles.StorageBlobDataContributor.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: storageAccount.outputs.resourceId
@@ -2173,9 +2277,10 @@ module assignStorageStorageBlobDataReaderAca 'modules/security/resource-role-ass
             'Microsoft.Authorization/roleDefinitions',
             const.roles.StorageBlobDataReader.guid
           )
-          #disable-next-line BCP318
           principalId: (useUAI)
+            #disable-next-line BCP318
             ? containerAppsUAI[i].outputs.principalId
+            #disable-next-line BCP318
             : containerApps[i].outputs.systemAssignedMIPrincipalId!
           #disable-next-line BCP318
           resourceId: storageAccount.outputs.resourceId
@@ -2195,7 +2300,9 @@ module assignStorageStorageBlobDataReaderSearch 'modules/security/resource-role-
       {
         #disable-next-line BCP318
         principalId: (useUAI)
+          #disable-next-line BCP318
           ? searchServiceUAI.outputs.principalId
+          #disable-next-line BCP318
           : searchService.outputs.systemAssignedMIPrincipalId!
         roleDefinitionId: subscriptionResourceId(
           'Microsoft.Authorization/roleDefinitions',
@@ -2279,7 +2386,7 @@ module assignStorageStorageBlobDataReaderAIFoundryProject 'modules/security/reso
 // App Configuration Store
 //////////////////////////////////////////////////////////////////////////
 
-module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.6.3' = if (deployAppConfig) {
+module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.7.0' = if (deployAppConfig) {
   name: 'appConfig'
   params: {
     name: appConfigName
@@ -2311,7 +2418,6 @@ module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' 
         #disable-next-line BCP318
         name: containerApps[i].outputs.name
         serviceName: containerAppsList[i].service_name
-        canonical_name: containerAppsList[i].canonical_name
         #disable-next-line BCP318
         principalId: containerApps[i].outputs.systemAssignedMIPrincipalId!
         #disable-next-line BCP318
@@ -2324,9 +2430,9 @@ module containerAppsSettings 'modules/container-apps/container-apps-list.bicep' 
 // prepare the model deployment names for the app configuration store
 var _modelDeploymentNamesSettings = [
   for modelDeployment in modelDeploymentList: {
-    name: modelDeployment.canonical_name
+    name: modelDeployment.key
     value: modelDeployment.name
-    label: 'gpt-rag'
+    label: 'landing-zone'
     contentType: 'text/plain'
   }
 ]
@@ -2334,9 +2440,9 @@ var _modelDeploymentNamesSettings = [
 // prepare the database container names for the app configuration store
 var _databaseContainerNamesSettings = [
   for databaseContainer in databaseContainersList: {
-    name: databaseContainer.canonical_name
+    name: databaseContainer.key
     value: databaseContainer.name
-    label: 'gpt-rag'
+    label: 'landing-zone'
     contentType: 'text/plain'
   }
 ]
@@ -2344,9 +2450,9 @@ var _databaseContainerNamesSettings = [
 // prepare the storage container names for the app configuration store
 var _storageContainerNamesSettings = [
   for storageContainer in storageAccountContainersList: {
-    name: storageContainer.canonical_name
+    name: storageContainer.key
     value: storageContainer.name
-    label: 'gpt-rag'
+    label: 'landing-zone'
     contentType: 'text/plain'
   }
 ]
@@ -2366,191 +2472,228 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
       _storageContainerNamesSettings,
       [
         // ── General / Deployment ─────────────────────────────────────────────
-        { name: 'AZURE_TENANT_ID', value: tenant().tenantId, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'SUBSCRIPTION_ID', value: subscription().subscriptionId, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'LOCATION', value: location, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'ENVIRONMENT_NAME', value: environmentName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'DEPLOYMENT_NAME', value: deployment().name, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'RESOURCE_TOKEN', value: resourceToken, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'NETWORK_ISOLATION', value: string(networkIsolation), label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'USE_UAI', value: string(useUAI), label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'LOG_LEVEL', value: 'INFO', label: 'gpt-rag', contentType: 'text/plain' }
+        { name: 'AZURE_TENANT_ID', value: tenant().tenantId, label: 'landing-zone', contentType: 'text/plain' }
+        {
+          name: 'SUBSCRIPTION_ID'
+          value: subscription().subscriptionId
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
+        { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'LOCATION', value: location, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'ENVIRONMENT_NAME', value: environmentName, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'DEPLOYMENT_NAME', value: deployment().name, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'RESOURCE_TOKEN', value: resourceToken, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'NETWORK_ISOLATION', value: string(networkIsolation), label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'USE_UAI', value: string(useUAI), label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'LOG_LEVEL', value: 'INFO', label: 'landing-zone', contentType: 'text/plain' }
 
         // ── Resource IDs ─────────────────────────────────────────────────────
         #disable-next-line BCP318
         {
           name: 'KEY_VAULT_RESOURCE_ID'
+          #disable-next-line BCP318
           value: keyVault.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'STORAGE_ACCOUNT_RESOURCE_ID'
+          #disable-next-line BCP318
           value: storageAccount.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'COSMOS_DB_ACCOUNT_RESOURCE_ID'
+          #disable-next-line BCP318
           value: cosmosDBAccount.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'APP_INSIGHTS_RESOURCE_ID'
+          #disable-next-line BCP318
           value: appInsights.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'LOG_ANALYTICS_RESOURCE_ID'
+          #disable-next-line BCP318
           value: logAnalytics.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'CONTAINER_ENV_RESOURCE_ID'
+          #disable-next-line BCP318
           value: containerEnv.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'CONTAINER_REGISTRY_RESOURCE_ID'
+          #disable-next-line BCP318
           value: containerRegistry.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'SEARCH_SERVICE_UAI_RESOURCE_ID'
+          #disable-next-line BCP318
           value: (useUAI) ? searchServiceUAI.outputs.resourceId : ''
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'SEARCH_SERVICE_RESOURCE_ID'
+          #disable-next-line BCP318
           value: searchService.outputs.resourceId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_ACCOUNT_RESOURCE_ID'
           value: aiFoundryAccount.outputs.accountID
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_PROJECT_RESOURCE_ID'
           value: aiFoundryProject.outputs.projectId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
 
         // ── Resource Names ───────────────────────────────────────────────────
-        { name: 'AI_FOUNDRY_ACCOUNT_NAME', value: aiFoundryAccountName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'AI_FOUNDRY_PROJECT_NAME', value: aiFoundryProjectName, label: 'gpt-rag', contentType: 'text/plain' }
+        {
+          name: 'AI_FOUNDRY_ACCOUNT_NAME'
+          value: aiFoundryAccountName
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
+        {
+          name: 'AI_FOUNDRY_PROJECT_NAME'
+          value: aiFoundryProjectName
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
         {
           name: 'AI_FOUNDRY_STORAGE_ACCOUNT_NAME'
           value: aiFoundryStorageAccountName
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        { name: 'APP_CONFIG_NAME', value: appConfigName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'APP_INSIGHTS_NAME', value: appInsightsName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'CONTAINER_ENV_NAME', value: containerEnvName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'CONTAINER_REGISTRY_NAME', value: containerRegistryName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'DATABASE_ACCOUNT_NAME', value: dbAccountName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'DATABASE_NAME', value: dbDatabaseName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'SEARCH_SERVICE_NAME', value: searchServiceName, label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'STORAGE_ACCOUNT_NAME', value: storageAccountName, label: 'gpt-rag', contentType: 'text/plain' }
+        { name: 'APP_CONFIG_NAME', value: appConfigName, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'APP_INSIGHTS_NAME', value: appInsightsName, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'CONTAINER_ENV_NAME', value: containerEnvName, label: 'landing-zone', contentType: 'text/plain' }
+        {
+          name: 'CONTAINER_REGISTRY_NAME'
+          value: containerRegistryName
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
+        { name: 'DATABASE_ACCOUNT_NAME', value: dbAccountName, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'DATABASE_NAME', value: dbDatabaseName, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'SEARCH_SERVICE_NAME', value: searchServiceName, label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'STORAGE_ACCOUNT_NAME', value: storageAccountName, label: 'landing-zone', contentType: 'text/plain' }
 
         // ── Feature flagging ─────────────────────────────────────────────────
-        { name: 'DEPLOY_APP_CONFIG', value: string(deployAppConfig), label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'DEPLOY_KEY_VAULT', value: string(deployKeyVault), label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'DEPLOY_LOG_ANALYTICS', value: string(deployLogAnalytics), label: 'gpt-rag', contentType: 'text/plain' }
-        { name: 'DEPLOY_APP_INSIGHTS', value: string(deployAppInsights), label: 'gpt-rag', contentType: 'text/plain' }
+        { name: 'DEPLOY_APP_CONFIG', value: string(deployAppConfig), label: 'landing-zone', contentType: 'text/plain' }
+        { name: 'DEPLOY_KEY_VAULT', value: string(deployKeyVault), label: 'landing-zone', contentType: 'text/plain' }
+        {
+          name: 'DEPLOY_LOG_ANALYTICS'
+          value: string(deployLogAnalytics)
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
+        {
+          name: 'DEPLOY_APP_INSIGHTS'
+          value: string(deployAppInsights)
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
         {
           name: 'DEPLOY_SEARCH_SERVICE'
           value: string(deploySearchService)
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'DEPLOY_STORAGE_ACCOUNT'
           value: string(deployStorageAccount)
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        { name: 'DEPLOY_COSMOS_DB', value: string(deployCosmosDb), label: 'gpt-rag', contentType: 'text/plain' }
+        { name: 'DEPLOY_COSMOS_DB', value: string(deployCosmosDb), label: 'landing-zone', contentType: 'text/plain' }
         {
           name: 'DEPLOY_CONTAINER_APPS'
           value: string(deployContainerApps)
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'DEPLOY_CONTAINER_REGISTRY'
           value: string(deployContainerRegistry)
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        { name: 'DEPLOY_CONTAINER_ENV', value: string(deployContainerEnv), label: 'gpt-rag', contentType: 'text/plain' }
+        {
+          name: 'DEPLOY_CONTAINER_ENV'
+          value: string(deployContainerEnv)
+          label: 'landing-zone'
+          contentType: 'text/plain'
+        }
 
         // ── Endpoints / URIs ──────────────────────────────────────────────────
         #disable-next-line BCP318
-        { name: 'KEY_VAULT_URI', value: keyVault.outputs.uri, label: 'gpt-rag', contentType: 'text/plain' }
+        { name: 'KEY_VAULT_URI', value: keyVault.outputs.uri, label: 'landing-zone', contentType: 'text/plain' }
         #disable-next-line BCP318
         {
           name: 'CONTAINER_REGISTRY_LOGIN_SERVER'
+          #disable-next-line BCP318
           value: containerRegistry.outputs.loginServer
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'STORAGE_BLOB_ENDPOINT'
+          #disable-next-line BCP318
           value: storageAccount.outputs.primaryBlobEndpoint
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'SEARCH_SERVICE_QUERY_ENDPOINT'
+          #disable-next-line BCP318
           value: searchService.outputs.endpoint
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_ACCOUNT_ENDPOINT'
           value: aiFoundryAccount.outputs.accountTarget
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_PROJECT_ENDPOINT'
           value: aiFoundryProject.outputs.endpoint
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_PROJECT_WORKSPACE_ID'
           value: aiFoundryFormatProjectWorkspaceId.outputs.projectWorkspaceIdGuid
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'COSMOS_DB_ENDPOINT'
+          #disable-next-line BCP318
           value: cosmosDBAccount.outputs.endpoint
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
 
@@ -2558,15 +2701,16 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         #disable-next-line BCP318
         {
           name: 'SEARCH_CONNECTION_ID'
+          #disable-next-line BCP318
           value: deploySearchService ? aiFoundryConnectionSearch.outputs.seachConnectionId : ''
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'BING_CONNECTION_ID'
+          #disable-next-line BCP318
           value: deployGroundingWithBing ? aiFoundryBingConnection.outputs.bingConnectionId : ''
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
 
@@ -2574,27 +2718,28 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         #disable-next-line BCP318
         {
           name: 'CONTAINER_ENV_PRINCIPAL_ID'
+          #disable-next-line BCP318
           value: containerEnv.outputs.systemAssignedMIPrincipalId!
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
-        #disable-next-line BCP318
         {
           name: 'SEARCH_SERVICE_PRINCIPAL_ID'
+          #disable-next-line BCP318
           value: searchService.outputs.systemAssignedMIPrincipalId!
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_ACCOUNT_PRINCIPAL_ID'
           value: aiFoundryAccount.outputs.accountPrincipalId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_PROJECT_PRINCIPAL_ID'
           value: aiFoundryProject.outputs.projectPrincipalId
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
 
@@ -2602,34 +2747,34 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         {
           name: 'AI_FOUNDRY_STORAGE_CONNECTION'
           value: aiFoundryProject.outputs.azureStorageConnection
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_COSMOS_DB_CONNECTION'
           value: aiFoundryProject.outputs.cosmosDBConnection
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
         {
           name: 'AI_FOUNDRY_SEARCH_CONNECTION'
           value: aiFoundryProject.outputs.aiSearchConnection
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'text/plain'
         }
 
         // ── Container Apps List & Model Deployments ────────────────────────────
-        #disable-next-line BCP318
         {
           name: 'CONTAINER_APPS'
+          #disable-next-line BCP318
           value: string(containerAppsSettings.outputs.containerAppsList)
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'application/json'
         }
         {
           name: 'MODEL_DEPLOYMENTS'
           value: string(modelDeploymentList)
-          label: 'gpt-rag'
+          label: 'landing-zone'
           contentType: 'application/json'
         }
       ]
