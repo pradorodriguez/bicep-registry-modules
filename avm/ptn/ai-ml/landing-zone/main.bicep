@@ -13,9 +13,6 @@ import * as const from 'constants/constants.bicep'
 // General Parameters
 // ----------------------------------------------------------------------
 
-@description('Name of the Azure Developer CLI environment')
-param environmentName string
-
 @description('The Azure region where your AI Foundry resource and project will be created.')
 param location string = resourceGroup().location
 
@@ -138,7 +135,7 @@ param useUAI bool = false // Use User Assigned Identity (UAI)
 // ----------------------------------------------------------------------
 
 @description('Unique token used to build deterministic resource names, derived from subscription ID, environment name, and location.')
-param resourceToken string = toLower(uniqueString(subscription().id, environmentName, location))
+param resourceToken string = toLower(uniqueString(subscription().id, resourceGroup().name, location))
 
 @description('Name of the Azure AI Foundry account to create or reference.')
 param aiFoundryAccountName string = '${const.abbrs.ai.aiFoundry}${resourceToken}'
@@ -264,8 +261,7 @@ param storageAccountContainersList array
 // General Variables
 // ----------------------------------------------------------------------
 
-var _azdTags = { 'azd-env-name': environmentName }
-var _tags = union(_azdTags, deploymentTags)
+var _tags = deploymentTags
 
 // ----------------------------------------------------------------------
 // Reuse Existing Services Variables
@@ -1181,12 +1177,13 @@ module azureFirewall 'br/public:avm/res/network/azure-firewall:0.7.1' = if (gree
 // 1) Replace this section by AI Foundry Pattern
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/ptn/ai-ml/ai-foundry
 
-// module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.1.0' = {
+// module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.1.1' = {
 //   name: 'aiFoundryDeployment'
 //   params: {
 //     // Required parameters
 //     aiFoundryType: 'StandardPrivate'
 //     contentSafetyEnabled: true
+//     aiAgentSubnetId: _subnetIdAgentSubnet  (TO BE CONFIRMED)
 //     name: '<name>'
 //     // Non-required parameters
 //     aiModelDeployments: []
@@ -2481,7 +2478,6 @@ module appConfigPopulate 'modules/app-configuration/app-configuration.bicep' = i
         }
         { name: 'RESOURCE_GROUP_NAME', value: resourceGroup().name, label: 'landing-zone', contentType: 'text/plain' }
         { name: 'LOCATION', value: location, label: 'landing-zone', contentType: 'text/plain' }
-        { name: 'ENVIRONMENT_NAME', value: environmentName, label: 'landing-zone', contentType: 'text/plain' }
         { name: 'DEPLOYMENT_NAME', value: deployment().name, label: 'landing-zone', contentType: 'text/plain' }
         { name: 'RESOURCE_TOKEN', value: resourceToken, label: 'landing-zone', contentType: 'text/plain' }
         { name: 'NETWORK_ISOLATION', value: string(networkIsolation), label: 'landing-zone', contentType: 'text/plain' }
@@ -2796,7 +2792,6 @@ output TENANT_ID string = tenant().tenantId
 output SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP_NAME string = resourceGroup().name
 output LOCATION string = location
-output ENVIRONMENT_NAME string = environmentName
 output DEPLOYMENT_NAME string = deployment().name
 output RESOURCE_TOKEN string = resourceToken
 output NETWORK_ISOLATION bool = networkIsolation

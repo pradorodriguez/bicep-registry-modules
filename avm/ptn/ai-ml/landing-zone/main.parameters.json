@@ -2,17 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "environmentName": {
-            "value": "${AZURE_ENV_NAME}"
-        },
         "location": {
-            "value": "${AZURE_LOCATION}"
+            "value": "eastus2"
         },
         "deploymentTags": {
             "value": {}
         },
         "principalId": {
-            "value": "${AZURE_PRINCIPAL_ID}"
+            "value": "88e31ae8-65b8-46a2-8b26-fad4e6c305f3"
         },
         "networkIsolation": {
             "value": "false"
