@@ -8,9 +8,6 @@
         "deploymentTags": {
             "value": {}
         },
-        "principalId": {
-            "value": "88e31ae8-65b8-46a2-8b26-fad4e6c305f3"
-        },
         "networkIsolation": {
             "value": "false"
         },
@@ -143,28 +140,6 @@
         "useCMK": {
             "value": "false"
         },
-        "modelDeploymentList": {
-            "value": [
-                {
-                    "name": "chat-completions",
-                    "model": "gpt-4o",
-                    "modelFormat": "OpenAI",
-                    "type": "GlobalStandard",
-                    "version": "2024-11-20",
-                    "capacity": 40,
-                    "key": "CHAT_COMPLETIONS_DEPLOYMENT_NAME"
-                },
-                {
-                    "name": "text-embedding",
-                    "model": "text-embedding-3-large",
-                    "modelFormat": "OpenAI",
-                    "type": "Standard",
-                    "version": "1",
-                    "capacity": 40,
-                    "key": "EMBEDDING_DEPLOYMENT_NAME"
-                }
-            ]
-        },
         "workloadProfiles": {
             "value": [
                 {
@@ -179,41 +154,28 @@
                 }
             ]
         },
-        "storageAccountContainersList": {
+        "storageAccountContainers": {
             "value": [
                 {
-                    "name": "documents",
-                    "key": "DOCUMENTS_STORAGE_CONTAINER"
+                    "name": "documents"
                 }
             ]
         },
-        "databaseContainersList": {
+        "databaseContainers": {
             "value": [
                 {
-                    "name": "conversations",
-                    "key": "CONVERSATIONS_DATABASE_CONTAINER"
+                    "name": "conversations"
                 }
             ]
         },
-        "containerAppsList": {
+        "containerApps": {
             "value": [
                 {
                     "name": null,
                     "service_name": "orchestrator",
                     "profile_name": "main",
                     "min_replicas": 1,
-                    "max_replicas": 1,
-                    "key": "ORCHESTRATOR_APP",
-                    "roles": [
-                        "AppConfigurationDataReader",
-                        "CognitiveServicesUser",
-                        "CognitiveServicesOpenAIUser",
-                        "AcrPull",
-                        "CosmosDBBuiltInDataContributor",
-                        "SearchIndexDataReader",
-                        "StorageBlobDataReader",
-                        "KeyVaultSecretsUser"
-                    ]
+                    "max_replicas": 1
                 }
             ]
         }
