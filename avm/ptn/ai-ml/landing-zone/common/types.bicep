@@ -112,17 +112,15 @@ type ContainerRegistryDefinitionType = {
   softDeleteRetentionInDays: int
   tags: { *: string }
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
 }
 
 @export()
@@ -167,17 +165,15 @@ type GenAIAppKeyVaultDefinitionType = {
   sku: string
   tenantId: string
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
   tags: { *: string }
 }
 
@@ -193,17 +189,15 @@ type GenAIAppStorageAccountDefinitionType = {
   publicNetworkAccessEnabled: bool
   sharedAccessKeyEnabled: bool
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
   tags: { *: string }
 }
 
@@ -219,17 +213,15 @@ type KSAISearchDefinitionType = {
   semanticSearchSku: string
   tags: { *: string }
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
   enableTelemetry: bool
 }
 
@@ -252,17 +244,15 @@ type AppConfigurationDefinitionType = {
   softDeleteRetentionInDays: int
   tags: { *: string }
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
 }
 
 @export()
@@ -289,17 +279,15 @@ type AiFoundryDefinitionType = {
     keyVault: { existingResourceId: string, name: string }
   }
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
   tags: { *: string }
 }
 
@@ -514,17 +502,15 @@ type AppGatewayDefinitionType = {
   }
   tags: { *: string }
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
 }
 
 @export()
@@ -606,17 +592,15 @@ type ApimDefinitionType = {
   notificationSenderEmail: string
   protocols: { enableHttp2: bool }
   roleAssignments: {
-    *: {
-      roleDefinitionIdOrName: string
-      principalId: string
-      description: string
-      skipServicePrincipalAadCheck: bool
-      condition: string
-      conditionVersion: string
-      delegatedManagedIdentityResourceId: string
-      principalType: string
-    }
-  }
+    name: string?
+    principalId: string
+    roleDefinitionIdOrName: string
+    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
+    description: string?
+    condition: string?
+    conditionVersion: '2.0'?
+    delegatedManagedIdentityResourceId: string?
+  }[]
   signIn: { enabled: bool }
   signUp: { enabled: bool, termsOfService: { consentRequired: bool, enabled: bool, text: string } }
   skuRoot: string
