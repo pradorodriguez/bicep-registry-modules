@@ -10,29 +10,20 @@ targetScope = 'resourceGroup'
 import * as const from 'common/constants.bicep'
 import * as types from 'common/types.bicep'
 
-// TODO: Add terraform imports.
-
 //
 // General Configuration
 //
 @description('Azure region for AI Foundry resources.')
 param location string = resourceGroup().location
+
 @description('Tags applied to all deployed resources.')
-param deploymentTags object = {}
+param tags object = {}
 
 //
-// Naming & Tokens
+// Token
 //
 @description('Deterministic token for resource names.')
 param resourceToken string = toLower(uniqueString(subscription().id, resourceGroup().name, location))
-@description('Container for all generated resource name values.')
-param resourceNames types.ResourceNamesType
-
-//
-// Identity Settings
-//
-@description('Use User‑Assigned Managed Identities instead of System‑Assigned.')
-param useUAI bool = false
 
 //
 // Network Settings
@@ -41,51 +32,149 @@ param useUAI bool = false
 param networkIsolation bool = false
 
 //
-// Feature Flags
-//
-@description('Toggle deployment of various services.')
-param featureFlags types.FeatureFlagsType
-
-//
 // Reuse Existing Services
 //
-@description('Optional existing resource IDs to reuse; leave empty to create new resources.')
+@description('Optional existing resource IDs to reuse, leave empty to create new resources.')
 param resourceIds types.ResourceIdsType
 
-// TODO: Add existing services logic.
+//
+// Virtual Network
+//
+@description('Virtual Network configuration.')
+param vnetDefinition types.VNetDefinitionType
 
 //
-// Container App Environment Workload Profiles
+// Log Analytics Workspace
 //
-@description('List of Workload Profiles to create.')
-param workloadProfiles types.WorkloadProfileType[]
+@description('Log Analytics Workspace configuration.')
+param logAnalyticsDefinition types.LogAnalyticsWorkspaceDefinitionType
+
+//
+// Application Insights Component
+//
+@description('Application Insights configuration.')
+param appInsightsDefinition types.AppInsightsDefinitionType
+
+//
+// Container App Environment
+//
+@description('Container App Environment configuration.')
+param containerAppEnvDefinition types.ContainerAppEnvDefinitionType
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//
+// Container Registry
+//
+@description('Container Registry configuration.')
+param containerRegistryDefinition types.ContainerRegistryDefinitionType?
 
 //
 // Container Apps
 //
-@description('List of Container Apps to create.')
-param containerApps types.ContainerAppDefinitionType[]
+@description('List of container apps to create.')
+param containerApps types.ContainerAppDefinitionType[]?
 
 //
-// Cosmos DB
+// Cosmos DB Account
 //
-@description('Names of the Cosmos DB containers to create.')
-param databaseContainers types.DatabaseContainerDefinitionType[]
+@description('Cosmos DB account configuration.')
+param cosmosDbDefinition types.GenAIAppCosmosDbDefinitionType?
+
+//
+// Key Vault
+//
+@description('Key Vault configuration.')
+param keyVaultDefinition types.GenAIAppKeyVaultDefinitionType?
 
 //
 // Storage Account
 //
-@description('Containers to create in the Storage Account.')
-param storageAccountContainersList types.StorageContainerDefinitionType[]
+@description('Storage Account configuration.')
+param storageAccountDefinition types.GenAIAppStorageAccountDefinitionType?
+
+//
+// AI Search
+//
+@description('AI Search service configuration.')
+param searchDefinition types.KSAISearchDefinitionType?
+
+//
+// Bing Grounding
+//
+@description('Bing Grounding service configuration.')
+param groundingDefinition types.KSGroundingWithBingDefinitionType?
+
+//
+// App Configuration
+//
+@description('App Configuration store configuration.')
+param appConfigurationDefinition types.AppConfigurationDefinitionType?
+
+// AI Foundry
+//
+@description('AI Foundry project configuration.')
+param aiFoundryDefinition types.AiFoundryDefinitionType?
 
 //
 // Virtual Machine
 //
 @secure()
 @description('Admin password for the VM user.')
-param vmAdminPassword string = ''
-@description('VM settings and associated Key Vault configuration.')
-param vmSettings types.VMSettingsType
+param vmAdminPassword string
+@description('Jump VM configuration.')
+param vmSettings types.JumpVmDefinitionType?
+
+//
+// Bastion
+//
+@description('Bastion configuration.')
+param bastionDefinition types.BastionDefinitionType?
+
+// Network Security Groups
+//
+@description('Network Security Groups configuration.')
+param nsgDefinitions types.NSGDefinitionsType?
+
+//
+// Private DNS Zones
+//
+@description('Private DNS Zones configuration.')
+param privateDnsDefinitions types.PrivateDNSZoneDefinitionsType?
+
+//
+// WAF Policy
+//
+@description('WAF Policy configuration.')
+param wafPolicyDefinitions types.WafPolicyDefinitionsType?
+
+//
+// Application Gateway
+//
+@description('Application Gateway configuration.')
+param appGatewayDefinition types.AppGatewayDefinitionType?
+
+//
+// API Management
+//
+@description('API Management configuration.')
+param apimDefinition types.ApimDefinitionType?
+
+//
+// Firewall
+//
+@description('Firewall configuration.')
+param firewallDefinition types.FirewallDefinitionType?
+
+//
+// Hub VNet Peering
+//
+@description('Hub VNet peering configuration.')
+param hvnetPeeringDefinition types.HuVnetPeeringDefinitionType?
 
 //
 // CMK params
@@ -102,12 +191,6 @@ param vmSettings types.VMSettingsType
 // General Variables
 //
 
-var _tags = deploymentTags
-
-//
-// Reuse Existing Services Variables
-//
-
 //
 // Container vars
 //
@@ -115,39 +198,8 @@ var _tags = deploymentTags
 var _containerDummyImageName = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
 //
-// Networking vars
-//
-
-#disable-next-line BCP318
-var _subnetIdPeSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/pe-subnet' : ''
-
-var _subnetIDCappEnvSubnet = networkIsolation
-  #disable-next-line BCP318
-  ? '${virtualNetwork.outputs.resourceId}/subnets/aca-environment-subnet'
-  : ''
-
-#disable-next-line BCP318
-var _subnetIdJumpbxSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/jumpbox-subnet' : ''
-
-#disable-next-line BCP318
-var _subnetIdAgentSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/agent-subnet' : ''
-
-#disable-next-line BCP318
-var _subNetIdAppGwSubnet = networkIsolation ? '${virtualNetwork.outputs.resourceId}/subnets/AppGatewaySubnet' : ''
-
-var _subnetIdAPIMgmtSubnet = networkIsolation
-  #disable-next-line BCP318
-  ? '${virtualNetwork.outputs.resourceId}/subnets/api-management-subnet'
-  : ''
-
-//
 // VM vars
 //
-
-var _vmKeyVaultSecName = !empty(vmSettings.vmKeyVaultSecName) ? vmSettings.vmKeyVaultSecName : 'vmUserInitialPassword'
-var _vmBaseName = !empty(vmSettings.vmName) ? vmSettings.vmName : 'testvm${resourceToken}'
-var _vmName = substring(_vmBaseName, 0, 15)
-var _vmUserName = !empty(vmSettings.vmUserName) ? vmSettings.vmUserName : 'tesvmuser'
 
 //////////////////////////////////////////////////////////////////////////
 // RESOURCES
@@ -173,678 +225,181 @@ var _vmUserName = !empty(vmSettings.vmUserName) ? vmSettings.vmUserName : 'tesvm
 // Azure DDoS Protection
 
 // VNet
+
 // Note on IP address sizing: https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/virtual-networks#known-limitations
-module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (networkIsolation) {
+
+// Split the full resource ID if passed in
+var _vnetIdSegments = empty(resourceIds.virtualNetworkResourceId)
+  ? ['']
+  : split(resourceIds.virtualNetworkResourceId, '/')
+var _existingVNetSubscriptionId = length(_vnetIdSegments) >= 3 ? _vnetIdSegments[2] : ''
+var _existingVNetResourceGroupName = length(_vnetIdSegments) >= 5 ? _vnetIdSegments[4] : ''
+var _existingVNetName = length(_vnetIdSegments) >= 1 ? last(_vnetIdSegments) : ''
+
+resource existingVNet 'Microsoft.Network/virtualNetworks@2024-07-01' existing = if (!empty(resourceIds.virtualNetworkResourceId)) {
+  name: _existingVNetName
+  scope: resourceGroup(_existingVNetSubscriptionId, _existingVNetResourceGroupName)
+}
+
+var _vnetName = empty(vnetDefinition.name!)
+  ? '${const.abbrs.networking.virtualNetwork}${resourceToken}'
+  : vnetDefinition.name!
+
+module virtualNetwork 'br/public:avm/res/network/virtual-network:0.7.0' = if (empty(resourceIds.virtualNetworkResourceId)) {
   name: 'virtualNetworkDeployment'
   params: {
-    // VNet sized /16 to fit all subnets
-    addressPrefixes: [
-      '192.168.0.0/16'
-    ]
-    name: resourceNames.vnetName
+    name: _vnetName
     location: location
-
-    tags: _tags
-
-    subnets: [
-      {
-        name: 'agent-subnet'
-        addressPrefix: '192.168.0.0/24' // 256 IPs for AI Foundry agents
-        delegation: 'Microsoft.app/environments'
-      }
-      {
-        name: 'pe-subnet'
-        addressPrefix: '192.168.1.0/24' // 256 IPs for private endpoints
-      }
-      {
-        name: 'gateway-subnet'
-        addressPrefix: '192.168.2.0/26' // 64 IPs for VPN/ExpressRoute gateway (min /26)
-      }
-      {
-        name: 'AzureBastionSubnet'
-        addressPrefix: '192.168.2.64/26' // 64 IPs for Bastion host (min /26)
-      }
-      {
-        name: 'AzureFirewallSubnet'
-        addressPrefix: '192.168.2.128/26' // 64 IPs for Firewall (min /26)
-      }
-      {
-        name: 'AppGatewaySubnet'
-        addressPrefix: '192.168.3.0/24' // 256 IPs for Application Gateway + WAF
-      }
-      {
-        name: 'jumpbox-subnet'
-        addressPrefix: '192.168.4.0/27' // 32 IPs for jumpbox VMs
-      }
-      {
-        name: 'api-management-subnet'
-        addressPrefix: '192.168.4.32/27' // 32 IPs for API Management
-      }
-      {
-        name: 'aca-environment-subnet'
-        addressPrefix: '192.168.4.64/27' // 32 IPs for Container Apps environment
-        delegation: 'Microsoft.app/environments'
-      }
-      {
-        name: 'devops-build-agents-subnet'
-        addressPrefix: '192.168.4.96/27' // 32 IPs for DevOps build agents
-      }
-    ]
-  }
-}
-
-// Azure virtual machine creation (Jumpbox)
-///////////////////////////////////////////////////////////////////////////
-
-// Azure Bastion
-
-//  Key Vault to store that password securely
-module testVmKeyVault 'br/public:avm/res/key-vault/vault:0.13.0' = if (featureFlags.deployVM && networkIsolation) {
-  name: 'vmKeyVault'
-  params: {
-    name: '${const.abbrs.security.keyVault}testvm-${resourceToken}'
-    location: location
-    publicNetworkAccess: 'Disabled'
-    sku: 'standard'
-    enableRbacAuthorization: true
-    tags: _tags
-    secrets: [
-      {
-        name: _vmKeyVaultSecName
-        value: vmAdminPassword
-      }
-    ]
-  }
-}
-
-// Bastion Host
-module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.6.1' = if (featureFlags.deployVM && networkIsolation) {
-  name: 'bastionHost'
-  params: {
-    // Bastion host name
-    name: '${const.abbrs.security.bastion}testvm-${resourceToken}'
-    #disable-next-line BCP318
-    virtualNetworkResourceId: virtualNetwork.outputs.resourceId
-    location: location
-    skuName: 'Standard'
-    tags: _tags
-
-    // Configuration for the Public IP that the module will create
-    publicIPAddressObject: {
-      // Name for the Public IP resource
-      name: '${const.abbrs.networking.publicIPAddress}bastion-${resourceToken}'
-      allocationMethod: 'Static'
-      skuName: 'Standard'
-      skuTier: 'Regional'
-      zones: [1, 2, 3]
-      tags: _tags
-    }
-  }
-}
-
-// Test VM
-module testVm 'br/public:avm/res/compute/virtual-machine:0.15.1' = if (featureFlags.deployVM && networkIsolation) {
-  name: 'testVmDeployment'
-  params: {
-    name: _vmName
-    location: location
-    adminUsername: _vmUserName
-    adminPassword: vmAdminPassword
-    imageReference: {
-      publisher: 'MicrosoftWindowsServer'
-      offer: 'WindowsServer'
-      sku: '2022-datacenter-azure-edition'
-      version: 'latest'
-    }
-    vmSize: vmSettings.vmSize
-    osDisk: {
-      caching: 'ReadWrite'
-      diskSizeGB: 128
-      managedDisk: {
-        storageAccountType: 'StandardSSD_LRS'
-      }
-    }
-    osType: 'Windows'
-    zone: 0
-    nicConfigurations: [
-      {
-        nicSuffix: '-nic-01'
-        ipConfigurations: [
+    tags: union(tags, vnetDefinition.tags! ?? {})
+    addressPrefixes: [vnetDefinition.addressSpace]
+    ddosProtectionPlanResourceId: vnetDefinition.ddosProtectionPlanResourceId!
+    dnsServers: vnetDefinition.dnsServers!
+    subnets: vnetDefinition.subnets
+    peerings: empty(vnetDefinition.peerVnetResourceId)
+      ? []
+      : [
           {
-            name: 'ipconfig01'
-            #disable-next-line BCP318
-            subnetResourceId: _subnetIdJumpbxSubnet
+            name: '${_vnetName}-to-peer'
+            remoteVirtualNetworkResourceId: vnetDefinition.peerVnetResourceId
           }
         ]
-      }
-    ]
-  }
-  dependsOn: [
-    virtualNetwork!
-    testVmKeyVault
-    testVmBastionHost
-  ]
-}
-
-// Private DNS Zones and Endpoints.
-///////////////////////////////////////////////////////////////////////////
-// TODO: Create Private DNS Zones and Endpoints.
-
-// API Management
-//////////////////////////////////////////////////////////////////////////
-module apiManagement 'br/public:avm/res/api-management/service:0.9.1' = if (featureFlags.greenFieldDeployment) {
-  name: 'apimDeployment'
-  params: {
-    name: 'apimgw-${resourceToken}'
-    publisherEmail: 'owner@contoso.com'
-    publisherName: 'Contoso Admin'
-    sku: 'Premium'
-    virtualNetworkType: networkIsolation ? 'Internal' : 'None'
-    subnetResourceId: _subnetIdAPIMgmtSubnet
-    tags: _tags
-  }
-  dependsOn: [
-    appGw
-    virtualNetwork!
-  ]
-}
-
-// Azure Application Gateway
-//////////////////////////////////////////////////////////////////////////
-module appGw 'br/public:avm/res/network/application-gateway:0.7.0' = if (featureFlags.greenFieldDeployment) {
-  name: 'applicationGatewayDeployment'
-  params: {
-    name: 'appGw-${resourceToken}'
-    gatewayIPConfigurations: [{ name: 'appGwIPConfig', properties: { subnet: { id: _subNetIdAppGwSubnet } } }]
-    frontendIPConfigurations: [{ name: 'appGwFrontendIP', properties: { subnet: { id: _subNetIdAppGwSubnet } } }]
-    frontendPorts: [{ name: 'appGwFrontendPort', properties: { port: 80 } }]
-    backendAddressPools: [{ name: 'appGwBackEndPool' }]
-    backendHttpSettingsCollection: [{ name: 'appGwBackEndSettings', properties: { port: 80, protocol: 'Http' } }]
-    requestRoutingRules: [
-      { name: 'appGwRule', properties: { ruleType: 'Basic', httpListener: { id: '' } /* placeholder */ } }
-    ]
-    sku: 'Standard_v2'
-  }
-  dependsOn: [virtualNetwork!]
-}
-
-// Azure Firewall
-//////////////////////////////////////////////////////////////////////////
-module azureFirewall 'br/public:avm/res/network/azure-firewall:0.7.1' = if (featureFlags.greenFieldDeployment) {
-  name: 'azureFirewallDeployment'
-  params: {
-    name: 'azFw-${resourceToken}'
-    #disable-next-line BCP318
-    virtualNetworkResourceId: virtualNetwork.outputs.resourceId
-    location: location
-  }
-  dependsOn: [
-    virtualNetwork!
-  ]
-}
-
-// AI Foundry Standard Setup
-//////////////////////////////////////////////////////////////////////////
-
-// Custom modules are used for AI Foundry Account and Project (V2) since no published AVM module available at this time.
-
-// 1) Replace this section by AI Foundry Pattern
-// https://github.com/Azure/bicep-registry-modules/tree/main/avm/ptn/ai-ml/ai-foundry
-
-// module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.1.1' = {
-//   name: 'aiFoundryDeployment'
-//   params: {
-//     // Required parameters
-//     aiFoundryType: 'StandardPrivate'
-//     contentSafetyEnabled: true
-//     aiAgentSubnetId: _subnetIdAgentSubnet  (TO BE CONFIRMED)
-//     name: '<name>'
-//     // Non-required parameters
-//     aiModelDeployments: []
-//     userObjectId: '00000000-0000-0000-0000-000000000000'
-//     vmAdminPasswordOrKey: vmAdminPassword
-//     vmSize: 'Standard_DS4_v2'
-//   }
-// }
-
-// Application Insights
-//////////////////////////////////////////////////////////////////////////
-
-module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (featureFlags.deployAppInsights) {
-  name: 'appInsights'
-  params: {
-    name: resourceNames.appInsightsName
-    location: location
-    #disable-next-line BCP318
-    workspaceResourceId: logAnalytics.outputs.resourceId
-    applicationType: 'web'
-    kind: 'web'
-    disableIpMasking: false
-    tags: _tags
-  }
-}
-
-// Container Resources
-//////////////////////////////////////////////////////////////////////////
-
-// Container Apps Environment
-module containerEnv 'br/public:avm/res/app/managed-environment:0.10.0' = if (featureFlags.deployContainerEnv) {
-  name: 'containerEnv'
-  params: {
-    name: resourceNames.containerEnvName
-    location: location
-    tags: _tags
-    // log & insights
-    #disable-next-line BCP318
-    logAnalyticsWorkspaceResourceId: logAnalytics.outputs.resourceId
-    #disable-next-line BCP318
-    appInsightsConnectionString: appInsights.outputs.connectionString
-    zoneRedundant: false
-
-    // scale settings
-    workloadProfiles: workloadProfiles
-
-    // identity
-    managedIdentities: {
-      systemAssigned: useUAI ? false : true
-      #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [containerEnvUAI.outputs.resourceId] : []
-    }
-    infrastructureSubnetId: networkIsolation ? _subnetIDCappEnvSubnet : ''
-    internal: networkIsolation ? true : false
-  }
-}
-
-// Container Registry
-module containerRegistry 'br/public:avm/res/container-registry/registry:0.9.1' = if (featureFlags.deployContainerRegistry) {
-  name: 'containerRegistry'
-  params: {
-    name: resourceNames.containerRegistryName
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
-    location: location
-    acrSku: networkIsolation ? 'Premium' : 'Basic'
-    tags: _tags
-    managedIdentities: {
-      systemAssigned: useUAI ? false : true
-      #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [containerRegistryUAI.outputs.resourceId] : []
-    }
-  }
-}
-
-// Container Apps
-@batchSize(1)
-module containerApplications 'br/public:avm/res/app/container-app:0.18.1' = [
-  for (app, index) in containerApps: if (featureFlags.deployContainerApps) {
-    name: empty(app.name) ? '${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}' : app.name
-    params: {
-      name: empty(app.name) ? '${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}' : app.name
-      location: location
-      #disable-next-line BCP318
-      environmentResourceId: containerEnv.outputs.resourceId
-      workloadProfileName: app.profile_name
-
-      ingressExternal: networkIsolation ? false : true
-      ingressTargetPort: 80
-      ingressTransport: 'auto'
-      ingressAllowInsecure: false
-
-      dapr: {
-        enabled: true
-        appId: app.service_name
-        appPort: 80
-        appProtocol: 'http'
-      }
-
-      managedIdentities: {
-        systemAssigned: (useUAI) ? false : true
-        #disable-next-line BCP318
-        userAssignedResourceIds: (useUAI) ? [containerAppsUAI[index].outputs.resourceId] : []
-      }
-
-      scaleSettings: {
-        minReplicas: app.min_replicas
-        maxReplicas: app.max_replicas
-      }
-
-      containers: [
-        {
-          name: app.service_name
-          image: _containerDummyImageName
-          resources: {
-            cpu: '0.5'
-            memory: '1.0Gi'
-          }
-          env: [
-            {
-              name: 'APP_CONFIG_ENDPOINT'
-              value: 'https://${resourceNames.appConfigName}.azconfig.io'
-            }
-            {
-              name: 'AZURE_TENANT_ID'
-              value: subscription().tenantId
-            }
-            {
-              name: 'AZURE_CLIENT_ID'
-              #disable-next-line BCP318
-              value: useUAI ? containerAppsUAI[index].outputs.clientId : ''
-            }
-          ]
-        }
-      ]
-
-      tags: union(_tags, {
-        'azd-service-name': app.service_name
-      })
-    }
-  }
-]
-
-// Cosmos DB Account and Database
-//////////////////////////////////////////////////////////////////////////
-
-module cosmosDBAccount 'br/public:avm/res/document-db/database-account:0.13.0' = if (featureFlags.deployCosmosDb) {
-  name: 'CosmosDBAccount'
-  params: {
-    name: resourceNames.dbAccountName
-    location: location
-    managedIdentities: {
-      systemAssigned: useUAI ? false : true
-      #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [cosmosUAI.outputs.resourceId] : []
-    }
-
-    locations: [
-      {
-        locationName: location
-        failoverPriority: 0
-        isZoneRedundant: false
-      }
-    ]
-    defaultConsistencyLevel: 'Session'
-    capabilitiesToAdd: ['EnableServerless']
-    networkRestrictions: {
-      publicNetworkAccess: 'Enabled'
-    }
-    tags: _tags
-    sqlDatabases: [
-      {
-        name: resourceNames.dbDatabaseName
-        throughput: 400
-        containers: [
-          for container in databaseContainers: {
-            name: container.name
-            paths: ['/id']
-            defaultTtl: -1
-            throughput: 400
-          }
-        ]
-      }
-    ]
-  }
-}
-
-// Key Vault
-//////////////////////////////////////////////////////////////////////////
-
-module keyVault 'br/public:avm/res/key-vault/vault:0.13.0' = if (featureFlags.deployKeyVault) {
-  name: 'keyVault'
-  params: {
-    name: resourceNames.keyVaultName
-    location: location
-    publicNetworkAccess: 'Enabled'
-    sku: 'standard'
-    enableRbacAuthorization: true
-    tags: _tags
   }
 }
 
 // Log Analytics Workspace
-//////////////////////////////////////////////////////////////////////////
 
-module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (featureFlags.deployLogAnalytics) {
-  name: 'logAnalytics'
+// Split the full resource ID if passed in
+var _lawIdSegments = empty(resourceIds.logAnalyticsWorkspaceResourceId)
+  ? ['']
+  : split(resourceIds.logAnalyticsWorkspaceResourceId, '/')
+var _existingLawSubscriptionId = length(_lawIdSegments) >= 3 ? _lawIdSegments[2] : ''
+var _existingLawResourceGroupName = length(_lawIdSegments) >= 5 ? _lawIdSegments[4] : ''
+var _existingLawName = length(_lawIdSegments) >= 1 ? last(_lawIdSegments) : ''
+
+resource existingLogAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' existing = if (!empty(resourceIds.logAnalyticsWorkspaceResourceId)) {
+  name: _existingLawName
+  scope: resourceGroup(_existingLawSubscriptionId, _existingLawResourceGroupName)
+}
+
+module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.12.0' = if (empty(resourceIds.logAnalyticsWorkspaceResourceId)) {
+  name: 'deployLogAnalytics'
   params: {
-    name: resourceNames.logAnalyticsWorkspaceName
+    name: empty(logAnalyticsDefinition.name!)
+      ? '${const.abbrs.managementGovernance.logAnalyticsWorkspace}${resourceToken}'
+      : logAnalyticsDefinition.name!
     location: location
-    skuName: 'PerGB2018'
-    dataRetention: 30
-    tags: _tags
+    skuName: logAnalyticsDefinition.sku
+    dataRetention: logAnalyticsDefinition.retention
+    tags: union(tags, logAnalyticsDefinition.tags! ?? {})
     managedIdentities: {
       systemAssigned: true
     }
   }
 }
 
-// AI Search
-//////////////////////////////////////////////////////////////////////////
+// Application Insights
 
-module searchService 'br/public:avm/res/search/search-service:0.11.0' = if (featureFlags.deploySearchService) {
-  name: 'searchService'
+// Split the full resource ID if passed in
+var _aiIdSegments = empty(resourceIds.appInsightsResourceId) ? [''] : split(resourceIds.appInsightsResourceId, '/')
+var _existingAISubscriptionId = length(_aiIdSegments) >= 3 ? _aiIdSegments[2] : ''
+var _existingAIResourceGroupName = length(_aiIdSegments) >= 5 ? _aiIdSegments[4] : ''
+var _existingAIName = length(_aiIdSegments) >= 1 ? last(_aiIdSegments) : ''
+
+resource existingAppInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(resourceIds.appInsightsResourceId)) {
+  name: _existingAIName
+  scope: resourceGroup(_existingAISubscriptionId, _existingAIResourceGroupName)
+}
+
+module appInsights 'br/public:avm/res/insights/component:0.6.0' = if (empty(resourceIds.appInsightsResourceId)) {
+  name: 'deployAppInsights'
   params: {
-    name: resourceNames.searchServiceName
+    name: empty(appInsightsDefinition.name!)
+      ? '${const.abbrs.managementGovernance.applicationInsights}${resourceToken}'
+      : appInsightsDefinition.name!
     location: location
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
-    tags: _tags
-
-    // SKU & capacity
-    sku: 'standard'
-    replicaCount: 1
-    semanticSearch: 'disabled'
-
-    // Identity & Auth
-    managedIdentities: {
-      systemAssigned: useUAI ? false : true
+    #disable-next-line BCP318
+    workspaceResourceId: empty(resourceIds.logAnalyticsWorkspaceResourceId)
       #disable-next-line BCP318
-      userAssignedResourceIds: useUAI ? [searchServiceUAI.outputs.resourceId] : []
-    }
-
-    disableLocalAuth: false
-    authOptions: {
-      aadOrApiKey: {
-        aadAuthFailureMode: 'http401WithBearerChallenge'
-      }
-    }
-    sharedPrivateLinkResources: networkIsolation
-      ? [
-          // Storage (blob)
-          {
-            groupId: 'blob'
-            #disable-next-line BCP318
-            privateLinkResourceId: storageAccount.outputs.resourceId
-            requestMessage: 'Automated link for Storage'
-            provisioningState: 'Succeeded'
-            status: 'Approved'
-          }
-          // AI Foundry Account
-          // {
-          //   groupId: 'account'
-          //   #disable-next-line BCP318
-          //   privateLinkResourceId: aiFoundryAccount.outputs.accountID
-          //   requestMessage: 'Automated link for AI Foundry Account'
-          //   provisioningState: 'Succeeded'
-          //   status: 'Approved'
-          // }
-        ]
-      : []
-  }
-  dependsOn: [
-    containerEnv!
-    // aiFoundryAccount!
-    storageAccount!
-  ]
-}
-
-// sharedPrivateLinkResources: [
-//   {
-//     groupId: 'blob'
-//     privateLinkResourceId: '<privateLinkResourceId>'
-//     requestMessage: 'Please approve this request'
-//     resourceRegion: '<resourceRegion>'
-//   }
-//   {
-//     groupId: 'vault'
-//     privateLinkResourceId: '<privateLinkResourceId>'
-//     requestMessage: 'Please approve this request'
-//   }
-// ]
-
-// Storage Accounts
-//////////////////////////////////////////////////////////////////////////
-
-// Storage Account
-module storageAccount 'br/public:avm/res/storage/storage-account:0.25.0' = if (featureFlags.deployStorageAccount) {
-  name: 'storageAccountSolution'
-  params: {
-    name: resourceNames.storageAccountName
-    location: location
-    publicNetworkAccess: 'Enabled'
-    skuName: 'Standard_LRS'
-    kind: 'StorageV2'
-    allowBlobPublicAccess: false
-    supportsHttpsTrafficOnly: true
-    networkAcls: {
-      bypass: 'AzureServices'
-      virtualNetworkRules: []
-      defaultAction: 'Allow'
-    }
-    tags: _tags
-    blobServices: {
-      automaticSnapshotPolicyEnabled: true
-      containerDeleteRetentionPolicyDays: 10
-      containerDeleteRetentionPolicyEnabled: true
-      containers: [
-        for container in storageAccountContainersList: {
-          name: container.name
-          publicAccess: 'None'
-        }
-      ]
-      deleteRetentionPolicyDays: 7
-      deleteRetentionPolicyEnabled: true
-      lastAccessTimeTrackingPolicyEnabled: true
-    }
+      ? logAnalytics.outputs.resourceId
+      : resourceIds.logAnalyticsWorkspaceResourceId
+    applicationType: appInsightsDefinition.applicationType ?? 'web'
+    kind: appInsightsDefinition.kind ?? 'web'
+    disableIpMasking: appInsightsDefinition.disableIpMasking! ?? false
+    tags: union(tags, appInsightsDefinition.tags! ?? {})
   }
 }
 
-//////////////////////////////////////////////////////////////////////////
-// User Managed Identities
-//////////////////////////////////////////////////////////////////////////
+// Container Apps Environment
 
-//AI Foundry Account User Managed Identity
-module aiFoundryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundryAccountName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundryAccountName}'
-    location: location
-  }
+// Compute the subnet ID for "aca-environment-subnet"
+var _subnetIDCappEnvSubnet = empty(resourceIds.virtualNetworkResourceId)
+  #disable-next-line BCP318
+  ? virtualNetwork.outputs.subnetResourceIds[indexOf(
+      #disable-next-line BCP318
+      virtualNetwork.outputs.subnetNames,
+      containerAppEnvDefinition.subnetName!
+    )]
+  : '${existingVNet.id}/subnets/${containerAppEnvDefinition.subnetName!}'
+
+// Split the full resource ID if passed in
+var _envIdSegments = empty(resourceIds.containerEnvResourceId) ? [''] : split(resourceIds.containerEnvResourceId, '/')
+var _existingEnvSubscriptionId = length(_envIdSegments) >= 3 ? _envIdSegments[2] : ''
+var _existingEnvResourceGroup = length(_envIdSegments) >= 5 ? _envIdSegments[4] : ''
+var _existingEnvName = length(_envIdSegments) >= 1 ? last(_envIdSegments) : ''
+
+resource existingContainerEnv 'Microsoft.App/managedEnvironments@2025-02-02-preview' existing = if (!empty(resourceIds.containerEnvResourceId)) {
+  name: _existingEnvName
+  scope: resourceGroup(_existingEnvSubscriptionId, _existingEnvResourceGroup)
 }
 
-//AI Foundry Search User Managed Identity
-module aiFoundrySearchServiceNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundrySearchServiceName}'
+// Create Container App Environment if not provided
+module containerEnv 'br/public:avm/res/app/managed-environment:0.11.2' = if (empty(resourceIds.containerEnvResourceId)) {
+  name: 'deployContainerEnv'
   params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundrySearchServiceName}'
+    name: empty(containerAppEnvDefinition.name!)
+      ? '${const.abbrs.containers.containerAppsEnvironment}${resourceToken}'
+      : containerAppEnvDefinition.name!
     location: location
-  }
-}
+    tags: union(tags, containerAppEnvDefinition.tags! ?? {})
 
-//AI Foundry Cosmos User Managed Identity
-module aiFoundryCosmosDbNameUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundryCosmosDbName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundryCosmosDbName}'
-    location: location
-  }
-}
+    appInsightsConnectionString: !empty(resourceIds.containerEnvResourceId)
+      #disable-next-line BCP318
+      ? existingAppInsights.properties.ConnectionString
+      #disable-next-line BCP318
+      : appInsights.outputs.connectionString
 
-// AI Foundry Project User Managed Identity
-module aiFoundryProjectUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundryProjectName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.aiFoundryProjectName}'
-    location: location
-  }
-}
+    zoneRedundant: containerAppEnvDefinition.zoneRedundancyEnabled
 
-//Container Apps Env User Managed Identity
-module containerEnvUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.containerEnvName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.containerEnvName}'
-    location: location
-  }
-}
+    workloadProfiles: containerAppEnvDefinition.workloadProfiles
 
-//Container Registry User Managed Identity
-module containerRegistryUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.containerRegistryName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.containerRegistryName}'
-    location: location
-  }
-}
-
-//Container Apps User Managed Identity
-module containerAppsUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = [
-  for app in containerApps: if (useUAI) {
-    name: '${const.abbrs.security.managedIdentity}${app.service_name}'
-    params: {
-      name: '${const.abbrs.security.managedIdentity}${const.abbrs.containers.containerApp}${resourceToken}-${app.service_name}'
-      location: location
-    }
-  }
-]
-
-//Cosmos User Managed Identity
-module cosmosUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.dbAccountName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.dbAccountName}'
-    location: location
-  }
-}
-
-//Search Service User Managed Identity
-module searchServiceUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (useUAI) {
-  name: '${const.abbrs.security.managedIdentity}${resourceNames.searchServiceName}'
-  params: {
-    name: '${const.abbrs.security.managedIdentity}${resourceNames.searchServiceName}'
-    location: location
-  }
-}
-
-// //////////////////////////////////////////////////////////////////////////
-// // ROLE ASSIGNMENTS
-// //////////////////////////////////////////////////////////////////////////
-
-// // Role assignments are centralized in this section to make it easier to view all permissions granted in this template.
-// // Custom modules are used for role assignments since no published AVM module available for this at the time we created this template.
-
-// TODO: Create Role Assignments.
-
-//////////////////////////////////////////////////////////////////////////
-// App Configuration Settings Service
-//////////////////////////////////////////////////////////////////////////
-
-// App Configuration Store
-//////////////////////////////////////////////////////////////////////////
-
-module appConfig 'br/public:avm/res/app-configuration/configuration-store:0.7.0' = if (featureFlags.deployAppConfig) {
-  name: 'appConfig'
-  params: {
-    name: resourceNames.appConfigName
-    location: location
-    sku: 'Standard'
     managedIdentities: {
-      systemAssigned: true
+      systemAssigned: !empty(containerAppEnvDefinition.userAssignedManagedIdentityIds) ? false : true
+      userAssignedResourceIds: containerAppEnvDefinition.userAssignedManagedIdentityIds
     }
-    tags: _tags
-    dataPlaneProxy: {
-      authenticationMode: 'Pass-through'
-      privateLinkDelegation: 'Disabled'
-    }
+
+    infrastructureSubnetResourceId: containerAppEnvDefinition.internalLoadBalancerEnabled ? _subnetIDCappEnvSubnet : ''
+    internal: containerAppEnvDefinition.internalLoadBalancerEnabled
+
+    roleAssignments: [
+      for ra in containerAppEnvDefinition.roleAssignments: {
+        name: ra.name! ?? guid(resourceIds.containerEnvResourceId, ra.principalId)
+        principalId: ra.principalId
+        roleDefinitionIdOrName: ra.roleDefinitionIdOrName
+        principalType: ra.principalType
+        description: ra.description!
+        condition: ra.condition!
+        conditionVersion: ra.conditionVersion!
+        delegatedManagedIdentityResourceId: ra.delegatedManagedIdentityResourceId!
+      }
+    ]
   }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
 // OUTPUTS
@@ -862,21 +417,24 @@ output RESOURCE_TOKEN string = resourceToken
 output NETWORK_ISOLATION bool = networkIsolation
 
 // ──────────────────────────────────────────────────────────────────────
-// Feature flagging
+// Resource IDs
 // ──────────────────────────────────────────────────────────────────────
-output DEPLOY_APP_CONFIG bool = featureFlags.deployAppConfig
-output DEPLOY_KEY_VAULT bool = featureFlags.deployKeyVault
-output DEPLOY_LOG_ANALYTICS bool = featureFlags.deployLogAnalytics
-output DEPLOY_APP_INSIGHTS bool = featureFlags.deployAppInsights
-output DEPLOY_SEARCH_SERVICE bool = featureFlags.deploySearchService
-output DEPLOY_STORAGE_ACCOUNT bool = featureFlags.deployStorageAccount
-output DEPLOY_COSMOS_DB bool = featureFlags.deployCosmosDb
-output DEPLOY_CONTAINER_APPS bool = featureFlags.deployContainerApps
-output DEPLOY_CONTAINER_REGISTRY bool = featureFlags.deployContainerRegistry
-output DEPLOY_CONTAINER_ENV bool = featureFlags.deployContainerEnv
+output virtualNetworkResourceId string = empty(resourceIds.virtualNetworkResourceId)
+  #disable-next-line BCP318
+  ? virtualNetwork.outputs.resourceId
+  : existingVNet.id
 
-// ──────────────────────────────────────────────────────────────────────
-// Endpoints / URIs
-// ──────────────────────────────────────────────────────────────────────
-#disable-next-line BCP318
-output APP_CONFIG_ENDPOINT string = appConfig.outputs.endpoint
+output logAnalyticsWorkspaceResourceId string = empty(resourceIds.logAnalyticsWorkspaceResourceId)
+  #disable-next-line BCP318
+  ? logAnalytics.outputs.resourceId
+  : existingLogAnalytics.id
+
+output applicationInsightsResourceId string = empty(resourceIds.appInsightsResourceId)
+  #disable-next-line BCP318
+  ? appInsights.outputs.resourceId
+  : existingAppInsights.id
+
+output containerEnvResourceId string = empty(resourceIds.containerEnvResourceId)
+  #disable-next-line BCP318
+  ? containerEnv.outputs.resourceId
+  : existingContainerEnv.id

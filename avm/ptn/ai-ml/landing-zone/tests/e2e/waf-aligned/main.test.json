@@ -1,1 +1,199 @@
-{}
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus2"
+        },
+        "tags": {
+            "value": {}
+        },
+        "networkIsolation": {
+            "value": false
+        },
+        "resourceIds": {
+            "value": {
+                "virtualNetworkResourceId": "",
+                "bastionHostResourceId": "",
+                "appInsightsResourceId": "",
+                "logAnalyticsWorkspaceResourceId": "",
+                "appConfigResourceId": "",
+                "keyVaultResourceId": "",
+                "storageAccountResourceId": "",
+                "dbAccountResourceId": "",
+                "searchServiceResourceId": "",
+                "groundingServiceResourceId": "",
+                "aiFoundryAccountResourceId": "",
+                "aiFoundrySearchServiceResourceId": "",
+                "aiFoundryCosmosDbResourceId": "",
+                "aiFoundryProjectResourceId": "",
+                "containerEnvResourceId": "",
+                "containerRegistryResourceId": "",
+                "apimServiceResourceId": "",
+                "applicationGatewayResourceId": "",
+                "firewallResourceId": ""
+            }
+        },
+        "vnetDefinition": {
+            "value": {
+                "name": "",
+                "addressSpace": "192.168.0.0/16",
+                "ddosProtectionPlanResourceId": "",
+                "dnsServers": [],
+                "subnets": [
+                    {
+                        "enabled": true,
+                        "name": "agent-subnet",
+                        "addressPrefix": "192.168.0.0/24",
+                        "delegation": "Microsoft.app/environments"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "pe-subnet",
+                        "addressPrefix": "192.168.1.0/24"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "gateway-subnet",
+                        "addressPrefix": "192.168.2.0/26"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "AzureBastionSubnet",
+                        "addressPrefix": "192.168.2.64/26"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "AzureFirewallSubnet",
+                        "addressPrefix": "192.168.2.128/26"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "AppGatewaySubnet",
+                        "addressPrefix": "192.168.3.0/24"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "jumpbox-subnet",
+                        "addressPrefix": "192.168.4.0/27"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "api-management-subnet",
+                        "addressPrefix": "192.168.4.32/27"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "aca-environment-subnet",
+                        "addressPrefix": "192.168.4.64/27",
+                        "delegation": "Microsoft.app/environments"
+                    },
+                    {
+                        "enabled": true,
+                        "name": "devops-build-agents-subnet",
+                        "addressPrefix": "192.168.4.96/27"
+                    }
+                ],
+                "peerVnetResourceId": "",
+                "tags": {}
+            }
+        },
+        "logAnalyticsDefinition": {
+            "value": {
+                "name": "",
+                "retention": 30,
+                "sku": "PerGB2018",
+                "tags": {}
+            }
+        },
+        "appInsightsDefinition": {
+            "value": {
+                "name": "",
+                "applicationType": "web",
+                "kind": "web",
+                "disableIpMasking": false,
+                "tags": {}
+            }
+        },
+        "containerAppEnvDefinition": {
+            "value": {
+                "name": "",
+                "tags": {},
+                "subnetName": "aca-environment-subnet",
+                "internalLoadBalancerEnabled": true,
+                "zoneRedundancyEnabled": false,
+                "userAssignedManagedIdentityIds": [],
+                "workloadProfiles": [
+                    {
+                        "name": "Consumption",
+                        "workloadProfileType": "Consumption"
+                    },
+                    {
+                        "workloadProfileType": "D4",
+                        "name": "default",
+                        "minimumCount": 1,
+                        "maximumCount": 3
+                    }
+                ],
+                "roleAssignments": []
+            }
+        },
+        "containerRegistryDefinition": {
+            "value": null
+        },
+        "containerApps": {
+            "value": null
+        },
+        "cosmosDbDefinition": {
+            "value": null
+        },
+        "keyVaultDefinition": {
+            "value": null
+        },
+        "storageAccountDefinition": {
+            "value": null
+        },
+        "searchDefinition": {
+            "value": null
+        },
+        "groundingDefinition": {
+            "value": null
+        },
+        "appConfigurationDefinition": {
+            "value": null
+        },
+        "aiFoundryDefinition": {
+            "value": null
+        },
+        "vmAdminPassword": {
+            "value": ""
+        },
+        "vmSettings": {
+            "value": null
+        },
+        "bastionDefinition": {
+            "value": null
+        },
+        "nsgDefinitions": {
+            "value": null
+        },
+        "privateDnsDefinitions": {
+            "value": null
+        },
+        "wafPolicyDefinitions": {
+            "value": null
+        },
+        "appGatewayDefinition": {
+            "value": null
+        },
+        "apimDefinition": {
+            "value": null
+        },
+        "firewallDefinition": {
+            "value": null
+        },
+        "hvnetPeeringDefinition": {
+            "value": null
+        }
+    }
+}

@@ -15,33 +15,33 @@ Creates an AI Landing Zone.
 
 The following Azure resource types are deployed by this module, along with their corresponding API versions:
 
-| Resource Type                                               | API Version                                                                                                                                                           |
-| :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Microsoft.Network/virtualNetworks`                         | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/virtualnetworks?api-version=2024-07-01)                      |
-| `Microsoft.Network/bastionHosts`                            | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/bastionhosts?api-version=2024-07-01)                         |
-| `Microsoft.Network/applicationGateways`                     | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/applicationgateways?api-version=2024-07-01)                   |
-| `Microsoft.Network/azureFirewalls`                          | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/azurefirewalls?api-version=2024-07-01)                        |
-| `Microsoft.Network/privateDnsZones`                         | [2024-06-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/privatednszones?api-version=2024-06-01)                       |
-| `Microsoft.Network/privateEndpoints`                        | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/privateendpoints?api-version=2024-07-01)                      |
-| `Microsoft.Network/privateLinkServices`                     | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.network/privatelinkservices?api-version=2024-07-01)                   |
-| `Microsoft.Compute/virtualMachines`                         | [2024-11-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.compute/virtualmachines?api-version=2024-11-01)                       |
-| `Microsoft.ApiManagement/service`                           | [2024-06-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.apimanagement/service?api-version=2024-06-01-preview)         |
-| `Microsoft.App/managedEnvironments`                         | [2025-02-02-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.app/managedenvironments?api-version=2025-02-02-preview)        |
-| `Microsoft.App/containerApps`                               | [2025-02-02-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.app/containerapps?api-version=2025-02-02-preview)              |
-| `Microsoft.ContainerRegistry/registries`                    | [2025-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.containerregistry/registries?api-version=2025-05-01-preview)   |
-| `Microsoft.Storage/storageAccounts`                         | [2022-09-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts?api-version=2022-09-01)                        |
-| `Microsoft.DocumentDB/databaseAccounts`                     | [2023-03-15](https://learn.microsoft.com/en-us/azure/templates/microsoft.documentdb/databaseaccounts?api-version=2023-03-15)                    |
-| `Microsoft.KeyVault/vaults`                                 | [2024-12-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.keyvault/vaults?api-version=2024-12-01-preview)                |
-| `Microsoft.OperationalInsights/workspaces`                  | [2025-02-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/workspaces?api-version=2025-02-01)                 |
-| `Microsoft.Insights/components`                             | [2020-02-02](https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?api-version=2020-02-02)                            |
-| `Microsoft.Search/searchServices`                           | [2021-04-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.search/searchservices?api-version=2021-04-01)                          |
-| `Microsoft.CognitiveServices/accounts`                      | [2025-04-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts?api-version=2025-04-01-preview)     |
-| `Microsoft.CognitiveServices/accounts/capabilityHosts`      | [2025-04-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts/capabilityhosts?api-version=2025-04-01-preview)           |
-| `Microsoft.CognitiveServices/accounts/deployments`          | [2025-04-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts/deployments?api-version=2025-04-01-preview)               |
-| `Microsoft.CognitiveServices/accounts/projects`             | [2025-04-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts/projects?api-version=2025-04-01-preview)                  |
-| `Microsoft.CognitiveServices/accounts/projects/connections` | [2025-04-01-preview](https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts/projects/connections?api-version=2025-04-01-preview)      |
-| `Microsoft.AppConfiguration/configurationStores`            | [2022-05-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.appconfiguration/configurationstores?api-version=2022-05-01)           |
-| `Microsoft.Authorization/roleAssignments`                   | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/microsoft.authorization/roleassignments?api-version=2022-04-01)                  |
+| Resource Type                                               | API Version          |
+| :---------------------------------------------------------- | :------------------- |
+| `Microsoft.Network/virtualNetworks`                         | `2024-07-01`         |
+| `Microsoft.Network/bastionHosts`                            | `2024-07-01`         |
+| `Microsoft.Network/applicationGateways`                     | `2024-07-01`         |
+| `Microsoft.Network/azureFirewalls`                          | `2024-07-01`         |
+| `Microsoft.Network/privateDnsZones`                         | `2024-06-01`         |
+| `Microsoft.Network/privateEndpoints`                        | `2024-07-01`         |
+| `Microsoft.Network/privateLinkServices`                     | `2024-07-01`         |
+| `Microsoft.Compute/virtualMachines`                         | `2024-11-01`         |
+| `Microsoft.ApiManagement/service`                           | `2024-06-01-preview` |
+| `Microsoft.App/managedEnvironments`                         | `2025-02-02-preview` |
+| `Microsoft.App/containerApps`                               | `2025-02-02-preview` |
+| `Microsoft.ContainerRegistry/registries`                    | `2025-05-01-preview` |
+| `Microsoft.Storage/storageAccounts`                         | `2022-09-01`         |
+| `Microsoft.DocumentDB/databaseAccounts`                     | `2023-03-15`         |
+| `Microsoft.KeyVault/vaults`                                 | `2024-12-01-preview` |
+| `Microsoft.OperationalInsights/workspaces`                  | `2025-02-01`         |
+| `Microsoft.Insights/components`                             | `2020-02-02`         |
+| `Microsoft.Search/searchServices`                           | `2021-04-01`         |
+| `Microsoft.CognitiveServices/accounts`                      | `2025-04-01-preview` |
+| `Microsoft.CognitiveServices/accounts/capabilityHosts`      | `2025-04-01-preview` |
+| `Microsoft.CognitiveServices/accounts/deployments`          | `2025-04-01-preview` |
+| `Microsoft.CognitiveServices/accounts/projects`             | `2025-04-01-preview` |
+| `Microsoft.CognitiveServices/accounts/projects/connections` | `2025-04-01-preview` |
+| `Microsoft.AppConfiguration/configurationStores`            | `2022-05-01`         |
+| `Microsoft.Authorization/roleAssignments`                   | `2022-04-01`         |
 
 ---
 
