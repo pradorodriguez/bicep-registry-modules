@@ -26,12 +26,6 @@ param tags object = {}
 param resourceToken string = toLower(uniqueString(subscription().id, resourceGroup().name, location))
 
 //
-// Network Settings
-//
-@description('Enable network isolation (private endpoints, no public access).')
-param networkIsolation bool = false
-
-//
 // Reuse Existing Services
 //
 @description('Optional existing resource IDs to reuse, leave empty to create new resources.')
