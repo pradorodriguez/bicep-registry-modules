@@ -419,7 +419,6 @@ module databaseAccount 'br/public:avm/res/document-db/database-account:0.15.0' =
 // Key Vault
 
 // Create Key Vault if not provided
-
 module vault 'br/public:avm/res/key-vault/vault:0.13.0' = {
   name: 'vaultDeployment'
   params: {
@@ -433,6 +432,38 @@ module vault 'br/public:avm/res/key-vault/vault:0.13.0' = {
   }
 }
 
+// Storage Account
+
+// Create Storage Account if not provided
+module storageAccount 'br/public:avm/res/storage/storage-account:0.25.1' = {
+  name: 'storageAccountDeployment'
+  params: {
+    // Required parameters
+    name: empty(storageAccountDefinition.name!)
+      ? '${const.abbrs.storage.storageAccount}${resourceToken}'
+      : storageAccountDefinition.name!
+    // Non-required parameters
+    allowBlobPublicAccess: storageAccountDefinition.publicNetworkAccessEnabled ?? false
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+    }
+    tags: union(tags, storageAccountDefinition.tags! ?? {})
+  }
+}
+
+// AI Search
+
+// Create AI Search if not provided
+module searchService 'br/public:avm/res/search/search-service:0.11.0' = {
+  name: 'searchServiceDeployment'
+  params: {
+    name: empty(searchDefinition.name!)
+      ? '${const.abbrs.ai.aiSearch}${resourceToken}'
+      : searchDefinition.name!
+    tags: union(tags, searchDefinition.tags! ?? {})
+  }
+}
 
 //////////////////////////////////////////////////////////////////////////
 // OUTPUTS
