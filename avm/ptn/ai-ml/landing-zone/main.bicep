@@ -383,6 +383,57 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.11.2' = if (emp
   }
 }
 
+// Container Registry
+
+// Create Container Registry if not provided
+module registry 'br/public:avm/res/container-registry/registry:0.9.1' = {
+  name: 'registryDeployment'
+  params: {
+    // Required parameters
+    name: empty(containerRegistryDefinition.name!)
+      ? '${const.abbrs.containers.containerRegistry}${resourceToken}'
+      : containerRegistryDefinition.name!
+    // Non-required parameters
+    acrSku: containerRegistryDefinition.sku ?? null
+    location: location
+    tags: union(tags, containerRegistryDefinition.tags! ?? {})
+  }
+}
+
+// Cosmos DB Account
+
+// Create CosmosDB if not provided
+
+module databaseAccount 'br/public:avm/res/document-db/database-account:0.15.0' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: empty(cosmosDbDefinition.name!)
+      ? '${const.abbrs.databases.cosmosDBDatabase}${resourceToken}'
+      : cosmosDbDefinition.name!
+    // Non-required parameters
+    zoneRedundant: false
+  }
+}
+
+// Key Vault
+
+// Create Key Vault if not provided
+
+module vault 'br/public:avm/res/key-vault/vault:0.13.0' = {
+  name: 'vaultDeployment'
+  params: {
+    // Required parameters
+    name: empty(keyVaultDefinition.name!)
+      ? '${const.abbrs.security.keyVault}${resourceToken}'
+      : keyVaultDefinition.name!
+    // Non-required parameters
+    enablePurgeProtection: false
+    tags: union(tags, keyVaultDefinition.tags! ?? {})
+  }
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // OUTPUTS
 //////////////////////////////////////////////////////////////////////////

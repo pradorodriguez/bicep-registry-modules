@@ -108,7 +108,7 @@ type ContainerRegistryDefinitionType = {
   name: string?
   localAuthEnabled: bool
   purgeProtectionEnabled: bool
-  sku: string
+  sku: 'Basic' | 'Premium' | 'Standard' | null
   softDeleteRetentionInDays: int
   tags: { *: string }
   roleAssignments: {
