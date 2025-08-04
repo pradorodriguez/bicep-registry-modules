@@ -465,6 +465,66 @@ module searchService 'br/public:avm/res/search/search-service:0.11.0' = {
   }
 }
 
+// App Configuration
+
+// Create App Configuration if not provided
+module configurationStore 'br/public:avm/res/app-configuration/configuration-store:0.7.0' = {
+  name: 'configurationStoreDeployment'
+  params: {
+    // Required parameters
+    name: empty(appConfigurationDefinition.name!)
+      ? '${const.abbrs.configuration.appConfiguration}${resourceToken}'
+      : appConfigurationDefinition.name!
+    // Non-required parameters
+    enablePurgeProtection: false
+  }
+}
+
+// Virtual Machine
+
+// Create Virtual Machine if not provided
+module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.17.0' = {
+  name: 'virtualMachineDeployment'
+  params: {
+    // Required parameters
+    adminUsername: 'localAdminUser'
+    availabilityZone: -1
+    imageReference: {
+      offer: 'WindowsServer'
+      publisher: 'MicrosoftWindowsServer'
+      sku: '2022-datacenter-azure-edition'
+      version: 'latest'
+    }
+    name: empty(vmSettings.name!)
+      ? '${const.abbrs.compute.virtualMachine}${resourceToken}'
+      : vmSettings.name!
+    nicConfigurations: [
+      {
+        ipConfigurations: [
+          {
+            name: 'ipconfig01'
+            subnetResourceId: '<subnetResourceId>'
+          }
+        ]
+        nicSuffix: '-nic-01'
+      }
+    ]
+    osDisk: {
+      caching: 'ReadWrite'
+      diskSizeGB: 128
+      managedDisk: {
+        storageAccountType: 'Premium_LRS'
+      }
+    }
+    osType: 'Windows'
+    vmSize: 'Standard_D2s_v3'
+    // Non-required parameters
+    adminPassword: vmAdminPassword
+    location: location
+  }
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // OUTPUTS
 //////////////////////////////////////////////////////////////////////////
