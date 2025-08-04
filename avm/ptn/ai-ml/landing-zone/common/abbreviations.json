@@ -1,0 +1,68 @@
+{
+  "ai": {
+    "aiFoundry": "aif-",
+    "aiFoundryProject": "aifp-",
+    "aiSearch": "srch-",
+    "bing": "bing-"
+  },
+  "configuration": {
+    "appConfiguration": "appcs-"
+  },
+  "compute": {
+    "appServiceEnvironment": "ase-",
+    "appServicePlan": "asp-",
+    "loadTesting": "lt-",
+    "availabilitySet": "avail-",
+    "arcEnabledServer": "arcs-",
+    "arcEnabledKubernetesCluster": "arck",
+    "batchAccounts": "ba-",
+    "cloudService": "cld-",
+    "communicationServices": "acs-",
+    "diskEncryptionSet": "des",
+    "functionApp": "func-",
+    "gallery": "gal",
+    "hostingEnvironment": "host-",
+    "imageTemplate": "it-",
+    "managedDiskOS": "osdisk",
+    "managedDiskData": "disk",
+    "notificationHubs": "ntf-",
+    "notificationHubsNamespace": "ntfns-",
+    "proximityPlacementGroup": "ppg-",
+    "restorePointCollection": "rpc-",
+    "snapshot": "snap-",
+    "staticWebApp": "stapp-",
+    "virtualMachine": "vm-",
+    "virtualMachineScaleSet": "vmss-",
+    "virtualMachineMaintenanceConfiguration": "mc-",
+    "virtualMachineStorageAccount": "stvm",
+    "webApp": "app-"
+  },
+  "containers": {
+    "aksCluster": "aks-",
+    "aksSystemNodePool": "npsystem-",
+    "aksUserNodePool": "np-",
+    "containerApp": "ca-",
+    "containerAppsEnvironment": "cae-",
+    "containerRegistry": "cr"
+  },
+  "databases": {
+    "cosmosDBDatabase": "cosmos-"
+  },
+  "managementGovernance": {
+    "applicationInsights": "appi-",
+    "logAnalyticsWorkspace": "log-"
+  },
+  "networking": {
+    "virtualNetwork": "vnet-",
+    "privateEndpoint": "pep-",
+    "publicIPAddress": "pip-"
+  },
+  "security": {
+    "bastion": "bas-",
+    "keyVault": "kv-",
+    "managedIdentity": "uai-"
+  },
+  "storage": {
+    "storageAccount": "st"
+  }
+}
