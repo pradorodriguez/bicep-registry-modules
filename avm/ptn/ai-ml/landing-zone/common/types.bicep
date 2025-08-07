@@ -104,23 +104,13 @@ type ContainerRegistryDefinitionType = {
   dataPlaneProxy: {
     authenticationMode: string
     privateLinkDelegation: string
-  }
+  }?
   name: string?
-  localAuthEnabled: bool
-  purgeProtectionEnabled: bool
+  localAuthEnabled: bool?
+  purgeProtectionEnabled: bool?
   sku: 'Basic' | 'Premium' | 'Standard' | null
-  softDeleteRetentionInDays: int
-  tags: { *: string }
-  roleAssignments: {
-    name: string?
-    principalId: string
-    roleDefinitionIdOrName: string
-    principalType: 'Device' | 'ForeignGroup' | 'Group' | 'ServicePrincipal' | 'User'
-    description: string?
-    condition: string?
-    conditionVersion: '2.0'?
-    delegatedManagedIdentityResourceId: string?
-  }[]
+  softDeleteRetentionInDays: int?
+  tags: { *: string }?
 }
 
 @export()
@@ -137,33 +127,33 @@ type ContainerAppDefinitionType = {
 @description('Configuration object for the Azure Cosmos DB account to be created for GenAI services.')
 type GenAIAppCosmosDbDefinitionType = {
   name: string?
-  secondaryRegions: { *: { location: string, zoneRedundant: bool, failoverPriority: int } }
-  publicNetworkAccessEnabled: bool
-  analyticalStorageEnabled: bool
-  automaticFailoverEnabled: bool
-  localAuthenticationDisabled: bool
-  partitionMergeEnabled: bool
-  multipleWriteLocationsEnabled: bool
-  analyticalStorageConfig: { schemaType: string }
-  consistencyPolicy: { maxIntervalInSeconds: int, maxStalenessPrefix: int, consistencyLevel: string }
-  backup: { retentionInHours: int, intervalInMinutes: int, storageRedundancy: string, type: string, tier: string }
-  capabilities: { *: { name: string } }
-  capacity: { totalThroughputLimit: int }
+  secondaryRegions: { *: { location: string, zoneRedundant: bool, failoverPriority: int } }?
+  publicNetworkAccessEnabled: bool?
+  analyticalStorageEnabled: bool?
+  automaticFailoverEnabled: bool?
+  localAuthenticationDisabled: bool?
+  partitionMergeEnabled: bool?
+  multipleWriteLocationsEnabled: bool?
+  analyticalStorageConfig: { schemaType: string }?
+  consistencyPolicy: { maxIntervalInSeconds: int, maxStalenessPrefix: int, consistencyLevel: string }?
+  backup: { retentionInHours: int, intervalInMinutes: int, storageRedundancy: string, type: string, tier: string }?
+  capabilities: { *: { name: string } }?
+  capacity: { totalThroughputLimit: int }?
   corsRule: {
     allowedHeaders: string[]
     allowedMethods: string[]
     allowedOrigins: string[]
     exposedHeaders: string[]
     maxAgeInSeconds: int
-  }
+  }?
 }
 
 @export()
 @description('Configuration object for the Azure Key Vault to be created for GenAI services.')
 type GenAIAppKeyVaultDefinitionType = {
   name: string?
-  sku: string
-  tenantId: string
+  sku: string?
+  tenantId: string?
   roleAssignments: {
     name: string?
     principalId: string
@@ -173,21 +163,21 @@ type GenAIAppKeyVaultDefinitionType = {
     condition: string?
     conditionVersion: '2.0'?
     delegatedManagedIdentityResourceId: string?
-  }[]
-  tags: { *: string }
+  }[]?
+  tags: { *: string }?
 }
 
 @export()
 @description('Configuration object for the Azure Storage Account to be created for GenAI services.')
 type GenAIAppStorageAccountDefinitionType = {
   name: string?
-  accountKind: string
-  accountTier: string
-  accountReplicationType: string
-  endpointTypes: string[]
-  accessTier: string
-  publicNetworkAccessEnabled: bool
-  sharedAccessKeyEnabled: bool
+  accountKind: string?
+  accountTier: string?
+  accountReplicationType: string?
+  endpointTypes: string[]?
+  accessTier: string?
+  publicNetworkAccessEnabled: bool?
+  sharedAccessKeyEnabled: bool?
   roleAssignments: {
     name: string?
     principalId: string
@@ -197,21 +187,21 @@ type GenAIAppStorageAccountDefinitionType = {
     condition: string?
     conditionVersion: '2.0'?
     delegatedManagedIdentityResourceId: string?
-  }[]
-  tags: { *: string }
+  }[]?
+  tags: { *: string }?
 }
 
 @export()
 @description('Configuration object for the Azure AI Search service to be deployed.')
 type KSAISearchDefinitionType = {
   name: string?
-  sku: string
-  localAuthenticationEnabled: bool
-  partitionCount: int
-  publicNetworkAccessEnabled: bool
-  replicaCount: int
-  semanticSearchSku: string
-  tags: { *: string }
+  sku: string?
+  localAuthenticationEnabled: bool?
+  partitionCount: int?
+  publicNetworkAccessEnabled: bool?
+  replicaCount: int?
+  semanticSearchSku: string?
+  tags: { *: string }?
   roleAssignments: {
     name: string?
     principalId: string
@@ -221,8 +211,8 @@ type KSAISearchDefinitionType = {
     condition: string?
     conditionVersion: '2.0'?
     delegatedManagedIdentityResourceId: string?
-  }[]
-  enableTelemetry: bool
+  }[]?
+  enableTelemetry: bool?
 }
 
 @export()
@@ -236,13 +226,13 @@ type KSGroundingWithBingDefinitionType = {
 @export()
 @description('Configuration object for the Azure App Configuration store for GenAI app.')
 type AppConfigurationDefinitionType = {
-  dataPlaneProxy: { authenticationMode: string, privateLinkDelegation: string }
+  dataPlaneProxy: { authenticationMode: string, privateLinkDelegation: string }?
   name: string?
-  localAuthEnabled: bool
-  purgeProtectionEnabled: bool
-  sku: string
-  softDeleteRetentionInDays: int
-  tags: { *: string }
+  localAuthEnabled: bool?
+  purgeProtectionEnabled: bool?
+  sku: string?
+  softDeleteRetentionInDays: int?
+  tags: { *: string }?
   roleAssignments: {
     name: string?
     principalId: string
@@ -252,7 +242,7 @@ type AppConfigurationDefinitionType = {
     condition: string?
     conditionVersion: '2.0'?
     delegatedManagedIdentityResourceId: string?
-  }[]
+  }[]?
 }
 
 @export()

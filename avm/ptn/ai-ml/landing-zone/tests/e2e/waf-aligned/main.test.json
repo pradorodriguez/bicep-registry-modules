@@ -136,28 +136,46 @@
             }
         },
         "containerRegistryDefinition": {
-            "value": null
+            "value": {
+                "name": "",
+                "sku": "Basic",
+                "tags": {}
+            }
         },
         "containerApps": {
             "value": null
         },
         "cosmosDbDefinition": {
-            "value": null
+            "value": {
+                "name": ""
+            }
         },
         "keyVaultDefinition": {
-            "value": null
+            "value": {
+                "name": "",
+                "tags": {}
+            }
         },
         "storageAccountDefinition": {
-            "value": null
+            "value": {
+                "name": "",
+                "publicNetworkAccessEnabled": null,
+                "tags": {}
+            }
         },
         "searchDefinition": {
-            "value": null
+            "value": {
+                "name": "",
+                "tags": {}
+            }
         },
         "groundingDefinition": {
             "value": null
         },
         "appConfigurationDefinition": {
-            "value": null
+            "value": {
+                "name": ""
+            }
         },
         "aiFoundryDefinition": {
             "value": null
