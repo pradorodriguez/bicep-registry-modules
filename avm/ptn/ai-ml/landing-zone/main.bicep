@@ -383,6 +383,151 @@ module containerEnv 'br/public:avm/res/app/managed-environment:0.11.2' = if (emp
   }
 }
 
+// Container Registry
+
+// Create Container Registry if not provided
+module registry 'br/public:avm/res/container-registry/registry:0.9.1' = {
+  name: 'registryDeployment'
+  params: {
+    // Required parameters
+    name: empty(containerRegistryDefinition!.name!)
+      ? '${const.abbrs.containers.containerRegistry}${resourceToken}'
+      : containerRegistryDefinition!.name!
+    // Non-required parameters
+    acrSku: containerRegistryDefinition!.sku!
+    location: location
+    managedIdentities: {
+      systemAssigned: true
+    }
+    tags: union(tags, containerRegistryDefinition!.tags! ?? {})
+  }
+}
+
+// Cosmos DB Account
+
+// Create CosmosDB if not provided
+
+module databaseAccount 'br/public:avm/res/document-db/database-account:0.15.0' = {
+  name: 'databaseAccountDeployment'
+  params: {
+    // Required parameters
+    name: empty(cosmosDbDefinition!.name!)
+      ? '${const.abbrs.databases.cosmosDBDatabase}${resourceToken}'
+      : cosmosDbDefinition!.name!
+    // Non-required parameters
+    zoneRedundant: false
+  }
+}
+
+// Key Vault
+
+// Create Key Vault if not provided
+module vault 'br/public:avm/res/key-vault/vault:0.13.0' = {
+  name: 'vaultDeployment'
+  params: {
+    // Required parameters
+    name: empty(keyVaultDefinition!.name!)
+      ? '${const.abbrs.security.keyVault}${resourceToken}'
+      : keyVaultDefinition!.name!
+    // Non-required parameters
+    enablePurgeProtection: false
+    tags: union(tags, keyVaultDefinition!.tags! ?? {})
+  }
+}
+
+// Storage Account
+
+// Create Storage Account if not provided
+module storageAccount 'br/public:avm/res/storage/storage-account:0.25.1' = {
+  name: 'storageAccountDeployment'
+  params: {
+    // Required parameters
+    name: empty(storageAccountDefinition!.name!)
+      ? '${const.abbrs.storage.storageAccount}${resourceToken}'
+      : storageAccountDefinition!.name!
+    // Non-required parameters
+    allowBlobPublicAccess: storageAccountDefinition!.publicNetworkAccessEnabled! ?? false
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+    }
+    tags: union(tags, storageAccountDefinition!.tags! ?? {})
+  }
+}
+
+// AI Search
+
+// Create AI Search if not provided
+module searchService 'br/public:avm/res/search/search-service:0.11.0' = {
+  name: 'searchServiceDeployment'
+  params: {
+    name: empty(searchDefinition!.name!)
+      ? '${const.abbrs.ai.aiSearch}${resourceToken}'
+      : searchDefinition!.name!
+    tags: union(tags, searchDefinition!.tags! ?? {})
+  }
+}
+
+// App Configuration
+
+// Create App Configuration if not provided
+module configurationStore 'br/public:avm/res/app-configuration/configuration-store:0.7.0' = {
+  name: 'configurationStoreDeployment'
+  params: {
+    // Required parameters
+    name: empty(appConfigurationDefinition!.name!)
+      ? '${const.abbrs.configuration.appConfiguration}${resourceToken}'
+      : appConfigurationDefinition!.name!
+    // Non-required parameters
+    enablePurgeProtection: false
+  }
+}
+
+// Virtual Machine
+
+// Create Virtual Machine if not provided
+// module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.17.0' = {
+//   name: 'virtualMachineDeployment'
+//   params: {
+//     // Required parameters
+//     adminUsername: 'localAdminUser'
+//     availabilityZone: -1
+//     imageReference: {
+//       offer: 'WindowsServer'
+//       publisher: 'MicrosoftWindowsServer'
+//       sku: '2022-datacenter-azure-edition'
+//       version: 'latest'
+//     }
+//     name: empty(vmSettings.name!)
+//       ? '${const.abbrs.compute.virtualMachine}${resourceToken}'
+//       : vmSettings.name!
+//     nicConfigurations: [
+//       {
+//         ipConfigurations: [
+//           {
+//             name: 'ipconfig01'
+//             subnetResourceId: '<subnetResourceId>'
+//           }
+//         ]
+//         nicSuffix: '-nic-01'
+//       }
+//     ]
+//     osDisk: {
+//       caching: 'ReadWrite'
+//       diskSizeGB: 128
+//       managedDisk: {
+//         storageAccountType: 'Premium_LRS'
+//       }
+//     }
+//     osType: 'Windows'
+//     vmSize: 'Standard_D2s_v3'
+//     // Non-required parameters
+//     adminPassword: vmAdminPassword
+//     location: location
+//   }
+// }
+
+
 //////////////////////////////////////////////////////////////////////////
 // OUTPUTS
 //////////////////////////////////////////////////////////////////////////
