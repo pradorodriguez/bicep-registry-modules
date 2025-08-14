@@ -1,1 +1,76 @@
-{}
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus2"
+        },
+        "tags": {
+            "value": {}
+        },
+        "resourceIds": {
+            "value": {
+                "virtualNetworkResourceId": "",
+                "bastionHostResourceId": "",
+                "appInsightsResourceId": "",
+                "logAnalyticsWorkspaceResourceId": "",
+                "appConfigResourceId": "",
+                "keyVaultResourceId": "",
+                "storageAccountResourceId": "",
+                "dbAccountResourceId": "",
+                "searchServiceResourceId": "",
+                "groundingServiceResourceId": "",
+                "containerEnvResourceId": "",
+                "containerRegistryResourceId": "",
+                "apimServiceResourceId": "",
+                "applicationGatewayResourceId": "",
+                "firewallResourceId": ""
+            }
+        },
+        "logAnalyticsDefinition": {
+            "value": null
+        },
+        "appInsightsDefinition": {
+            "value": null
+        },
+        "containerAppEnvDefinition": {
+            "value": null
+        },
+        "containerRegistryDefinition": {
+            "value": null
+        },
+        "cosmosDbDefinition": {
+            "value": null
+        },
+        "keyVaultDefinition": {
+            "value": null
+        },
+        "storageAccountDefinition": {
+            "value": null
+        },
+        "searchDefinition": {
+            "value": null
+        },
+        "appConfigurationDefinition": {
+            "value": null
+        },
+        "aiFoundryDefinition": {
+            "value": null
+        },
+        "wafPolicyDefinition": {
+            "value": null
+        },
+        "appGatewayDefinition": {
+            "value": null
+        },
+        "apimDefinition": {
+            "value": null
+        },
+        "firewallDefinition": {
+            "value": null
+        },
+        "hubVnetPeeringDefinition": {
+            "value": null
+        }
+    }
+}

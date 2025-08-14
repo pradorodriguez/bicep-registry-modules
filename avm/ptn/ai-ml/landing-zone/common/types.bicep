@@ -19,11 +19,7 @@ type ResourceIdsType = {
   storageAccountResourceId: string
   dbAccountResourceId: string
   searchServiceResourceId: string
-  groundingServiceResourceId: string // if you ever add a Bing grounding module
-  aiFoundryAccountResourceId: string
-  aiFoundrySearchServiceResourceId: string
-  aiFoundryCosmosDbResourceId: string
-  aiFoundryProjectResourceId: string
+  groundingServiceResourceId: string
 
   // Containers
   containerEnvResourceId: string
@@ -47,6 +43,10 @@ type VNetDefinitionType = {
     name: string
     addressPrefix: string
     delegation: string?
+    serviceEndpoints: string[]?
+    natGatewayResourceId: string?
+    privateEndpointNetworkPolicies: 'Enabled' | 'Disabled'?
+    privateLinkServiceNetworkPolicies: 'Enabled' | 'Disabled'?
   }[]
   peerVnetResourceId: string
   tags: { *: string }
@@ -65,8 +65,8 @@ type LogAnalyticsWorkspaceDefinitionType = {
 @description('Configuration object for the Application Insights component to be created or reused.')
 type AppInsightsDefinitionType = {
   name: string?
-  applicationType: 'web' | 'other' // e.g. 'web'; optional, defaults to 'web' in module
-  kind: 'web' | 'other' // e.g. 'web'; optional
+  applicationType: 'web' | 'other'
+  kind: 'web' | 'other'
   disableIpMasking: bool?
   tags: { *: string }?
 }
@@ -108,7 +108,7 @@ type ContainerRegistryDefinitionType = {
   name: string?
   localAuthEnabled: bool?
   purgeProtectionEnabled: bool?
-  sku: 'Basic' | 'Premium' | 'Standard' | null
+  sku: 'Basic' | 'Premium' | 'Standard'?
   softDeleteRetentionInDays: int?
   tags: { *: string }?
 }
@@ -150,7 +150,7 @@ type GenAIAppCosmosDbDefinitionType = {
 
 @export()
 @description('Configuration object for the Azure Key Vault to be created for GenAI services.')
-type GenAIAppKeyVaultDefinitionType = {
+type KeyVaultDefinitionType = {
   name: string?
   sku: string?
   tenantId: string?
@@ -169,7 +169,7 @@ type GenAIAppKeyVaultDefinitionType = {
 
 @export()
 @description('Configuration object for the Azure Storage Account to be created for GenAI services.')
-type GenAIAppStorageAccountDefinitionType = {
+type StorageAccountDefinitionType = {
   name: string?
   accountKind: string?
   accountTier: string?
@@ -311,7 +311,7 @@ type NSGDefinitionsType = {
       destinationAddressPrefix: string
       destinationAddressPrefixes: string[]
       destinationApplicationSecurityGroupIds: string[]
-      estinationPortRange: string
+      destinationPortRange: string
       destinationPortRanges: string[]
       direction: string
       name: string
@@ -340,11 +340,11 @@ type PrivateDNSZoneDefinitionsType = {
 type WafPolicyDefinitionsType = {
   name: string?
   policySettings: {
-    enabled: bool
-    mode: string
+    state: 'Enabled' | 'Disabled'
+    mode: 'Prevention' | 'Detection'
     requestBodyCheck: bool
-    maxRequestBodySizeKb: int
-    fileUploadLimitMb: int
+    maxRequestBodySizeInKb: int
+    fileUploadLimitInMb: int
   }
   managedRules: {
     exclusion: {
@@ -593,7 +593,7 @@ type ApimDefinitionType = {
   }[]
   signIn: { enabled: bool }
   signUp: { enabled: bool, termsOfService: { consentRequired: bool, enabled: bool, text: string } }
-  skuRoot: string
+  skuRoot: 'Basic' | 'BasicV2' | 'Consumption' | 'Developer' | 'Premium' | 'Standard' | 'StandardV2' | null
   skuCapacity: int
   tags: { *: string }
   tenantAccess: { enabled: bool }
@@ -604,8 +604,8 @@ type ApimDefinitionType = {
 type FirewallDefinitionType = {
   name: string?
   sku: string
-  tier: string
-  zones: string[]
+  tier: 'Basic' | 'Premium' | 'Standard' | null
+  zones: int[]
   tags: { *: string }
 }
 
