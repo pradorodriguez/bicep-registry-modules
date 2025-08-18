@@ -13,13 +13,13 @@ This module deploys a Virtual Machine Scale Set.
 
 ## Resource Types
 
-| Resource Type | API Version |
-| :-- | :-- |
-| `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
-| `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.Compute/virtualMachineScaleSets` | [2024-07-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Compute/2024-07-01/virtualMachineScaleSets) |
-| `Microsoft.Compute/virtualMachineScaleSets/extensions` | [2023-09-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Compute/2023-09-01/virtualMachineScaleSets/extensions) |
-| `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
+| Resource Type | API Version | References |
+| :-- | :-- | :-- |
+| `Microsoft.Authorization/locks` | 2020-05-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.authorization_locks.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks)</li></ul> |
+| `Microsoft.Authorization/roleAssignments` | 2022-04-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.authorization_roleassignments.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments)</li></ul> |
+| `Microsoft.Compute/virtualMachineScaleSets` | 2024-07-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.compute_virtualmachinescalesets.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Compute/2024-07-01/virtualMachineScaleSets)</li></ul> |
+| `Microsoft.Compute/virtualMachineScaleSets/extensions` | 2023-09-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.compute_virtualmachinescalesets_extensions.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Compute/2023-09-01/virtualMachineScaleSets/extensions)</li></ul> |
+| `Microsoft.Insights/diagnosticSettings` | 2021-05-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.insights_diagnosticsettings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings)</li></ul> |
 
 ## Usage examples
 
@@ -523,7 +523,7 @@ module virtualMachineScaleSet 'br/public:avm/res/compute/virtual-machine-scale-s
     skuName: 'Standard_B12ms'
     // Non-required parameters
     availabilityZones: [
-      '2'
+      2
     ]
     bootDiagnosticEnabled: true
     bootDiagnosticStorageAccountName: '<bootDiagnosticStorageAccountName>'
@@ -714,7 +714,7 @@ module virtualMachineScaleSet 'br/public:avm/res/compute/virtual-machine-scale-s
     // Non-required parameters
     "availabilityZones": {
       "value": [
-        "2"
+        2
       ]
     },
     "bootDiagnosticEnabled": {
@@ -931,7 +931,7 @@ param osType = 'Linux'
 param skuName = 'Standard_B12ms'
 // Non-required parameters
 param availabilityZones = [
-  '2'
+  2
 ]
 param bootDiagnosticEnabled = true
 param bootDiagnosticStorageAccountName = '<bootDiagnosticStorageAccountName>'
@@ -2910,7 +2910,6 @@ Specifies additional base-64 encoded XML formatted information that can be inclu
 
 - Required: No
 - Type: array
-- Default: `[]`
 
 ### Parameter: `automaticRepairsPolicyEnabled`
 
@@ -2934,6 +2933,14 @@ The virtual machine scale set zones. NOTE: Availability zones can only be set wh
     3
   ]
   ```
+- Allowed:
+  ```Bicep
+  [
+    1
+    2
+    3
+  ]
+  ```
 
 ### Parameter: `bootDiagnosticEnabled`
 
@@ -2949,7 +2956,6 @@ The name of the boot diagnostic storage account. Provide this if you want to use
 
 - Required: No
 - Type: string
-- Default: `''`
 
 ### Parameter: `bootDiagnosticStorageAccountUri`
 
@@ -3310,11 +3316,9 @@ Specifies that the image or disk that is being used was licensed on-premises. Th
 
 - Required: No
 - Type: string
-- Default: `''`
 - Allowed:
   ```Bicep
   [
-    ''
     'Windows_Client'
     'Windows_Server'
   ]
@@ -3341,6 +3345,7 @@ The lock settings of the service.
 | :-- | :-- | :-- |
 | [`kind`](#parameter-lockkind) | string | Specify the type of lock. |
 | [`name`](#parameter-lockname) | string | Specify the name of lock. |
+| [`notes`](#parameter-locknotes) | string | Specify the notes of the lock. |
 
 ### Parameter: `lock.kind`
 
@@ -3360,6 +3365,13 @@ Specify the type of lock.
 ### Parameter: `lock.name`
 
 Specify the name of lock.
+
+- Required: No
+- Type: string
+
+### Parameter: `lock.notes`
+
+Specify the notes of the lock.
 
 - Required: No
 - Type: string
@@ -3509,7 +3521,6 @@ Specifies information about the marketplace image used to create the virtual mac
 
 - Required: No
 - Type: object
-- Default: `{}`
 
 ### Parameter: `prioritizeUnhealthyInstances`
 
@@ -3533,7 +3544,6 @@ Resource ID of a proximity placement group.
 
 - Required: No
 - Type: string
-- Default: `''`
 
 ### Parameter: `publicKeys`
 
@@ -3776,7 +3786,6 @@ Specifies the time zone of the virtual machine. e.g. 'Pacific Standard Time'. Po
 
 - Required: No
 - Type: string
-- Default: `''`
 
 ### Parameter: `ultraSSDEnabled`
 
@@ -3876,6 +3885,7 @@ This section gives you an overview of all local-referenced module files (i.e., o
 | :-- | :-- |
 | `br/public:avm/utl/types/avm-common-types:0.4.1` | Remote reference |
 | `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |
+| `br/public:avm/utl/types/avm-common-types:0.6.0` | Remote reference |
 
 ## Data Collection
 

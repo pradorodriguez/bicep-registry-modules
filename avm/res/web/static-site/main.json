@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.34.44.8038",
-      "templateHash": "16268801724082727900"
+      "version": "0.37.4.10188",
+      "templateHash": "13094965275165818471"
     },
     "name": "Static Web Apps",
     "description": "This module deploys a Static Web App."
@@ -73,6 +73,36 @@
       },
       "metadata": {
         "__bicep_export!": true
+      }
+    },
+    "_1.lockType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "nullable": true,
+          "metadata": {
+            "description": "Optional. Specify the name of lock."
+          }
+        },
+        "kind": {
+          "type": "string",
+          "allowedValues": [
+            "CanNotDelete",
+            "None",
+            "ReadOnly"
+          ],
+          "nullable": true,
+          "metadata": {
+            "description": "Optional. Specify the type of lock."
+          }
+        }
+      },
+      "metadata": {
+        "description": "An AVM-aligned type for a lock.",
+        "__bicep_imported_from!": {
+          "sourceTemplate": "br:mcr.microsoft.com/bicep/avm/utl/types/avm-common-types:0.5.1"
+        }
       }
     },
     "_1.privateEndpointCustomDnsConfigType": {
@@ -205,12 +235,19 @@
           "metadata": {
             "description": "Optional. Specify the type of lock."
           }
+        },
+        "notes": {
+          "type": "string",
+          "nullable": true,
+          "metadata": {
+            "description": "Optional. Specify the notes of the lock."
+          }
         }
       },
       "metadata": {
         "description": "An AVM-aligned type for a lock.",
         "__bicep_imported_from!": {
-          "sourceTemplate": "br:mcr.microsoft.com/bicep/avm/utl/types/avm-common-types:0.5.1"
+          "sourceTemplate": "br:mcr.microsoft.com/bicep/avm/utl/types/avm-common-types:0.6.0"
         }
       }
     },
@@ -346,7 +383,7 @@
           }
         },
         "lock": {
-          "$ref": "#/definitions/lockType",
+          "$ref": "#/definitions/_1.lockType",
           "nullable": true,
           "metadata": {
             "description": "Optional. Specify the type of lock."
@@ -636,6 +673,17 @@
         "description": "Optional. The custom domains associated with this static site. The deployment will fail as long as the validation records are not present."
       }
     },
+    "validationMethod": {
+      "type": "string",
+      "nullable": true,
+      "allowedValues": [
+        "dns-txt-token",
+        "cname-delegation"
+      ],
+      "metadata": {
+        "description": "Optional. Custom domain validation method. If not specified, automatically determined based on domain structure."
+      }
+    },
     "publicNetworkAccess": {
       "type": "string",
       "defaultValue": "",
@@ -741,7 +789,7 @@
       "name": "[coalesce(tryGet(parameters('lock'), 'name'), format('lock-{0}', parameters('name')))]",
       "properties": {
         "level": "[coalesce(tryGet(parameters('lock'), 'kind'), '')]",
-        "notes": "[if(equals(tryGet(parameters('lock'), 'kind'), 'CanNotDelete'), 'Cannot delete resource or child resources.', 'Cannot delete or modify the resource or child resources.')]"
+        "notes": "[coalesce(tryGet(parameters('lock'), 'notes'), if(equals(tryGet(parameters('lock'), 'kind'), 'CanNotDelete'), 'Cannot delete resource or child resources.', 'Cannot delete or modify the resource or child resources.'))]"
       },
       "dependsOn": [
         "staticSite"
@@ -796,8 +844,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "13255454067128443657"
+              "version": "0.37.4.10188",
+              "templateHash": "14796820925554080303"
             },
             "name": "Static Web App Site Linked Backends",
             "description": "This module deploys a Custom Function App into a Static Web App Site using the Linked Backends property."
@@ -897,8 +945,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "10411947595066907075"
+              "version": "0.37.4.10188",
+              "templateHash": "9290278917286561036"
             },
             "name": "Static Web App Site Config",
             "description": "This module deploys a Static Web App Site Config."
@@ -991,8 +1039,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "10411947595066907075"
+              "version": "0.37.4.10188",
+              "templateHash": "9290278917286561036"
             },
             "name": "Static Web App Site Config",
             "description": "This module deploys a Static Web App Site Config."
@@ -1078,7 +1126,9 @@
           "staticSiteName": {
             "value": "[parameters('name')]"
           },
-          "validationMethod": "[if(equals(indexOf(parameters('customDomains')[copyIndex()], '.'), lastIndexOf(parameters('customDomains')[copyIndex()], '.')), createObject('value', 'dns-txt-token'), createObject('value', 'cname-delegation'))]"
+          "validationMethod": {
+            "value": "[coalesce(parameters('validationMethod'), if(equals(indexOf(parameters('customDomains')[copyIndex()], '.'), lastIndexOf(parameters('customDomains')[copyIndex()], '.')), 'dns-txt-token', 'cname-delegation'))]"
+          }
         },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -1086,8 +1136,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.34.44.8038",
-              "templateHash": "13361505089055584794"
+              "version": "0.37.4.10188",
+              "templateHash": "1437595508242162697"
             },
             "name": "Static Web App Site Custom Domains",
             "description": "This module deploys a Static Web App Site Custom Domain."

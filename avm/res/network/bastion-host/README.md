@@ -13,13 +13,13 @@ This module deploys a Bastion Host.
 
 ## Resource Types
 
-| Resource Type | API Version |
-| :-- | :-- |
-| `Microsoft.Authorization/locks` | [2020-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks) |
-| `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.Insights/diagnosticSettings` | [2021-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings) |
-| `Microsoft.Network/bastionHosts` | [2024-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2024-05-01/bastionHosts) |
-| `Microsoft.Network/publicIPAddresses` | [2024-05-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2024-05-01/publicIPAddresses) |
+| Resource Type | API Version | References |
+| :-- | :-- | :-- |
+| `Microsoft.Authorization/locks` | 2020-05-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.authorization_locks.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2020-05-01/locks)</li></ul> |
+| `Microsoft.Authorization/roleAssignments` | 2022-04-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.authorization_roleassignments.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments)</li></ul> |
+| `Microsoft.Insights/diagnosticSettings` | 2021-05-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.insights_diagnosticsettings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Insights/2021-05-01-preview/diagnosticSettings)</li></ul> |
+| `Microsoft.Network/bastionHosts` | 2024-05-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.network_bastionhosts.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2024-05-01/bastionHosts)</li></ul> |
+| `Microsoft.Network/publicIPAddresses` | 2024-05-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.network_publicipaddresses.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2024-05-01/publicIPAddresses)</li></ul> |
 
 ## Usage examples
 
@@ -381,6 +381,11 @@ module bastionHost 'br/public:avm/res/network/bastion-host:<version>' = {
     name: 'nbhmax001'
     virtualNetworkResourceId: '<virtualNetworkResourceId>'
     // Non-required parameters
+    availabilityZones: [
+      1
+      2
+      3
+    ]
     bastionSubnetPublicIpResourceId: '<bastionSubnetPublicIpResourceId>'
     diagnosticSettings: [
       {
@@ -426,11 +431,6 @@ module bastionHost 'br/public:avm/res/network/bastion-host:<version>' = {
       'hidden-title': 'This is visible in the resource name'
       Role: 'DeploymentValidation'
     }
-    zones: [
-      1
-      2
-      3
-    ]
   }
 }
 ```
@@ -455,6 +455,13 @@ module bastionHost 'br/public:avm/res/network/bastion-host:<version>' = {
       "value": "<virtualNetworkResourceId>"
     },
     // Non-required parameters
+    "availabilityZones": {
+      "value": [
+        1,
+        2,
+        3
+      ]
+    },
     "bastionSubnetPublicIpResourceId": {
       "value": "<bastionSubnetPublicIpResourceId>"
     },
@@ -523,13 +530,6 @@ module bastionHost 'br/public:avm/res/network/bastion-host:<version>' = {
         "hidden-title": "This is visible in the resource name",
         "Role": "DeploymentValidation"
       }
-    },
-    "zones": {
-      "value": [
-        1,
-        2,
-        3
-      ]
     }
   }
 }
@@ -549,6 +549,11 @@ using 'br/public:avm/res/network/bastion-host:<version>'
 param name = 'nbhmax001'
 param virtualNetworkResourceId = '<virtualNetworkResourceId>'
 // Non-required parameters
+param availabilityZones = [
+  1
+  2
+  3
+]
 param bastionSubnetPublicIpResourceId = '<bastionSubnetPublicIpResourceId>'
 param diagnosticSettings = [
   {
@@ -594,11 +599,6 @@ param tags = {
   'hidden-title': 'This is visible in the resource name'
   Role: 'DeploymentValidation'
 }
-param zones = [
-  1
-  2
-  3
-]
 ```
 
 </details>
@@ -851,6 +851,7 @@ param tags = {
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`availabilityZones`](#parameter-availabilityzones) | array | The list of Availability zones to use for the zone-redundant resources. |
 | [`bastionSubnetPublicIpResourceId`](#parameter-bastionsubnetpublicipresourceid) | string | The Public IP resource ID to associate to the azureBastionSubnet. If empty, then the Public IP that is created as part of this module will be applied to the azureBastionSubnet. This parameter is ignored when enablePrivateOnlyBastion is true. |
 | [`diagnosticSettings`](#parameter-diagnosticsettings) | array | The diagnostic settings of the service. |
 | [`disableCopyPaste`](#parameter-disablecopypaste) | bool | Choose to disable or enable Copy Paste. For Basic and Developer SKU Copy/Paste is always enabled. |
@@ -868,7 +869,6 @@ param tags = {
 | [`scaleUnits`](#parameter-scaleunits) | int | The scale units for the Bastion Host resource. The Basic and Developer SKU only support 2 scale units. |
 | [`skuName`](#parameter-skuname) | string | The SKU of this Bastion Host. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
-| [`zones`](#parameter-zones) | array | A list of availability zones denoting where the Bastion Host resource needs to come from. This is not supported for the Developer SKU. |
 
 ### Parameter: `name`
 
@@ -883,6 +883,29 @@ Shared services Virtual Network resource Id.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `availabilityZones`
+
+The list of Availability zones to use for the zone-redundant resources.
+
+- Required: No
+- Type: array
+- Default:
+  ```Bicep
+  [
+    1
+    2
+    3
+  ]
+  ```
+- Allowed:
+  ```Bicep
+  [
+    1
+    2
+    3
+  ]
+  ```
 
 ### Parameter: `bastionSubnetPublicIpResourceId`
 
@@ -1089,6 +1112,7 @@ The lock settings of the service.
 | :-- | :-- | :-- |
 | [`kind`](#parameter-lockkind) | string | Specify the type of lock. |
 | [`name`](#parameter-lockname) | string | Specify the name of lock. |
+| [`notes`](#parameter-locknotes) | string | Specify the notes of the lock. |
 
 ### Parameter: `lock.kind`
 
@@ -1108,6 +1132,13 @@ Specify the type of lock.
 ### Parameter: `lock.name`
 
 Specify the name of lock.
+
+- Required: No
+- Type: string
+
+### Parameter: `lock.notes`
+
+Specify the notes of the lock.
 
 - Required: No
 - Type: string
@@ -1260,22 +1291,6 @@ Tags of the resource.
 - Required: No
 - Type: object
 
-### Parameter: `zones`
-
-A list of availability zones denoting where the Bastion Host resource needs to come from. This is not supported for the Developer SKU.
-
-- Required: No
-- Type: array
-- Default: `[]`
-- Allowed:
-  ```Bicep
-  [
-    1
-    2
-    3
-  ]
-  ```
-
 ## Outputs
 
 | Output | Type | Description |
@@ -1294,6 +1309,7 @@ This section gives you an overview of all local-referenced module files (i.e., o
 | :-- | :-- |
 | `br/public:avm/res/network/public-ip-address:0.8.0` | Remote reference |
 | `br/public:avm/utl/types/avm-common-types:0.5.1` | Remote reference |
+| `br/public:avm/utl/types/avm-common-types:0.6.0` | Remote reference |
 
 ## Data Collection
 
